@@ -51,6 +51,7 @@ export default function LessonPlayer({ course, sections, allLessons, currentLess
   const [completedIds, setCompletedIds] = useState<Set<string>>(
     () => new Set(progress.filter((p: any) => p.completed).map((p: any) => p.lesson_id as string))
   )
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const saveTimer = useRef<ReturnType<typeof setTimeout>>()
 
   const currentLesson = allLessons.find(l => l.id === activeId)
@@ -66,6 +67,7 @@ export default function LessonPlayer({ course, sections, allLessons, currentLess
 
   function goLesson(id: string) {
     setActiveId(id)
+    setMobileSidebarOpen(false)
     router.replace(`/courses/${course.slug}/learn?lesson=${id}`, { scroll: false })
   }
 
@@ -80,7 +82,6 @@ export default function LessonPlayer({ course, sections, allLessons, currentLess
 
     if (completed) {
       setCompletedIds(prev => { const s = new Set(Array.from(prev)); s.add(lessonId); return s })
-      // Жалпы прогресті жаңарту
       const total = allLessons.length
       const done  = completedIds.size + 1
       const pct   = Math.round((done / total) * 100)
@@ -107,89 +108,134 @@ export default function LessonPlayer({ course, sections, allLessons, currentLess
     ? Math.round((completedIds.size / allLessons.length) * 100)
     : 0
 
+  // Сабақтар тізімі — ортақ контент
+  const lessonList = (
+    <>
+      <div className="px-4 py-3 b-eyebrow shrink-0 flex items-center justify-between" style={{ borderBottom: '1px solid var(--b-line)' }}>
+        <span>{t.course.program}</span>
+        <button className="md:hidden btn btn-ghost btn-sm" onClick={() => setMobileSidebarOpen(false)}>
+          <Icon name="close" size={18} />
+        </button>
+      </div>
+      <div className="overflow-y-auto flex-1">
+        {sections.map(sec => (
+          <div key={sec.id}>
+            <div className="px-4 py-2.5 b-sm font-semibold" style={{ background: 'var(--b-bg-soft)', borderBottom: '1px solid var(--b-line-soft)' }}>
+              {tr(sec.title_kk, sec.title_ru, sec.title_en)}
+            </div>
+            {(sec.lessons ?? []).sort((a, b) => a.order_idx - b.order_idx).map(lesson => {
+              const isActive    = lesson.id === activeId
+              const isCompleted = completedIds.has(lesson.id)
+              return (
+                <button
+                  key={lesson.id}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors"
+                  style={{
+                    background: isActive ? 'var(--b-primary-50)' : 'transparent',
+                    borderBottom: '1px solid var(--b-line-soft)',
+                    minHeight: 52,
+                  }}
+                  onClick={() => goLesson(lesson.id)}
+                >
+                  <div className="shrink-0">
+                    {isCompleted
+                      ? <Icon name="check" size={15} style={{ color: 'var(--b-teal)' }} />
+                      : isActive
+                      ? <Icon name="play" size={13} style={{ color: 'var(--b-primary)' }} />
+                      : <div style={{ width: 15, height: 15, borderRadius: '50%', border: '1.5px solid var(--b-line)', flexShrink: 0 }} />
+                    }
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="b-xs font-medium truncate" style={{ color: isActive ? 'var(--b-primary)' : 'var(--b-text-1)' }}>
+                      {tr(lesson.title_kk, lesson.title_ru, lesson.title_en)}
+                    </div>
+                    {lesson.duration_sec > 0 && (
+                      <div className="b-xs mt-0.5" style={{ color: 'var(--b-text-4)' }}>{fmtSec(lesson.duration_sec)}</div>
+                    )}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        ))}
+      </div>
+    </>
+  )
+
   return (
     <div className="flex flex-col" style={{ height: '100vh', background: 'var(--b-bg)', overflow: 'hidden' }}>
 
       {/* ── Жоғарғы тақта ── */}
       <header
-        className="flex items-center gap-4 px-5 shrink-0"
+        className="flex items-center gap-2 px-3 md:px-5 shrink-0"
         style={{ height: 56, borderBottom: '1px solid var(--b-line)', background: 'var(--b-bg)' }}
       >
-        <Link href={`/courses/${course.slug}`} className="btn btn-ghost btn-sm shrink-0">
+        <Link href={`/courses/${course.slug}`} className="btn btn-ghost btn-sm" style={{ minWidth: 44, minHeight: 44 }}>
           <Icon name="chevronLeft" size={16} />
         </Link>
-        <Logo size={24} />
-        <div className="flex-1 min-w-0">
+        <Logo size={22} />
+        <div className="flex-1 min-w-0 hidden sm:block">
           <div className="b-sm font-semibold truncate">
             {tr(course.title_kk, course.title_ru, course.title_en)}
           </div>
         </div>
-        {/* Прогресс бар */}
+        {/* Прогресс */}
         <div className="flex items-center gap-2 shrink-0">
-          <div className="progress" style={{ width: 120 }}>
+          <div className="progress hidden sm:block" style={{ width: 100 }}>
             <div className="progress-bar" style={{ width: `${progressPct}%` }} />
           </div>
           <span className="b-xs" style={{ color: 'var(--b-text-3)' }}>{progressPct}%</span>
         </div>
-        <Link href="/dashboard" className="btn btn-ghost btn-sm shrink-0">
+        {/* Mobile: сабақтар тізімін ашу */}
+        <button
+          className="md:hidden btn btn-ghost btn-sm"
+          onClick={() => setMobileSidebarOpen(v => !v)}
+          style={{ minWidth: 44, minHeight: 44 }}
+          aria-label="Toggle lessons"
+        >
+          <Icon name="book" size={18} />
+        </button>
+        <Link href="/dashboard" className="btn btn-ghost btn-sm" style={{ minWidth: 44, minHeight: 44 }}>
           <Icon name="grid" size={16} />
         </Link>
       </header>
 
       {/* ── Негізгі аудан ── */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
 
-        {/* Бүйір — сабақтар тізімі */}
+        {/* Mobile overlay */}
+        {mobileSidebarOpen && (
+          <div
+            className="md:hidden fixed inset-0 z-[150]"
+            style={{ background: 'rgba(0,0,0,0.45)' }}
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+        )}
+
+        {/* Mobile drawer — оң жақтан */}
         <aside
+          className="md:hidden fixed top-14 right-0 bottom-0 z-[200] flex flex-col"
+          style={{
+            width: Math.min(320, typeof window !== 'undefined' ? window.innerWidth * 0.85 : 320),
+            background: 'var(--b-bg-soft)',
+            borderLeft: '1px solid var(--b-line)',
+            transform: mobileSidebarOpen ? 'translateX(0)' : 'translateX(100%)',
+            transition: 'transform 0.28s cubic-bezier(0.4,0,0.2,1)',
+          }}
+        >
+          {lessonList}
+        </aside>
+
+        {/* Desktop sidebar — сол жақта */}
+        <aside
+          className="hidden md:flex flex-col shrink-0"
           style={{
             width: 300,
             borderRight: '1px solid var(--b-line)',
-            overflowY: 'auto',
             background: 'var(--b-bg-soft)',
           }}
         >
-          <div className="px-4 py-3 b-eyebrow" style={{ borderBottom: '1px solid var(--b-line)' }}>
-            {t.course.program}
-          </div>
-          {sections.map(sec => (
-            <div key={sec.id}>
-              <div className="px-4 py-2.5 b-sm font-semibold" style={{ background: 'var(--b-surface-2)', borderBottom: '1px solid var(--b-line-soft)' }}>
-                {tr(sec.title_kk, sec.title_ru, sec.title_en)}
-              </div>
-              {(sec.lessons ?? []).sort((a, b) => a.order_idx - b.order_idx).map(lesson => {
-                const isActive    = lesson.id === activeId
-                const isCompleted = completedIds.has(lesson.id)
-                return (
-                  <button
-                    key={lesson.id}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors"
-                    style={{
-                      background: isActive ? 'var(--b-primary-50)' : 'transparent',
-                      borderBottom: '1px solid var(--b-line-soft)',
-                    }}
-                    onClick={() => goLesson(lesson.id)}
-                  >
-                    <div className="shrink-0">
-                      {isCompleted
-                        ? <Icon name="check" size={15} style={{ color: 'var(--b-teal)' }} />
-                        : isActive
-                        ? <Icon name="play" size={13} style={{ color: 'var(--b-primary)' }} />
-                        : <div style={{ width: 15, height: 15, borderRadius: '50%', border: '1.5px solid var(--b-line)', flexShrink: 0 }} />
-                      }
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="b-xs font-medium truncate" style={{ color: isActive ? 'var(--b-primary)' : 'var(--b-text-1)' }}>
-                        {tr(lesson.title_kk, lesson.title_ru, lesson.title_en)}
-                      </div>
-                      {lesson.duration_sec > 0 && (
-                        <div className="b-xs mt-0.5" style={{ color: 'var(--b-text-4)' }}>{fmtSec(lesson.duration_sec)}</div>
-                      )}
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
-          ))}
+          {lessonList}
         </aside>
 
         {/* Плеер + мазмұн */}
@@ -211,25 +257,27 @@ export default function LessonPlayer({ course, sections, allLessons, currentLess
               <div className="text-center text-white">
                 <Icon name="video" size={48} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
                 <div className="b-body" style={{ opacity: 0.5 }}>
-                  {lang === 'kk' ? 'Видео жүктелуде…' : lang === 'en' ? 'Video is being processed…' : 'Видео обрабатывается…'}
+                  {lang === 'kk' ? 'Видео жүктелуде…' : lang === 'en' ? 'Video processing…' : 'Видео обрабатывается…'}
                 </div>
               </div>
             </div>
           )}
 
           {/* Сабақ аты + навигация */}
-          <div className="px-8 py-6" style={{ maxWidth: 860 }}>
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <h1 className="b-h2">
+          <div className="px-4 md:px-8 py-5 md:py-6" style={{ maxWidth: 860 }}>
+            <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
+              <h1 className="b-h2 flex-1" style={{ fontSize: 'clamp(16px, 2.5vw, 24px)' }}>
                 {currentLesson ? tr(currentLesson.title_kk, currentLesson.title_ru, currentLesson.title_en) : '—'}
               </h1>
               {!completedIds.has(activeId) && (
                 <button
                   className="btn btn-secondary btn-sm shrink-0 flex items-center gap-2"
+                  style={{ minHeight: 44 }}
                   onClick={() => currentLesson && saveProgress(currentLesson.id, 0, true)}
                 >
                   <Icon name="check" size={13} />
-                  {lang === 'kk' ? 'Аяқталды' : lang === 'en' ? 'Mark complete' : 'Отметить пройденным'}
+                  <span className="hidden sm:inline">{lang === 'kk' ? 'Аяқталды' : lang === 'en' ? 'Mark complete' : 'Пройдено'}</span>
+                  <span className="sm:hidden">✓</span>
                 </button>
               )}
             </div>
@@ -238,6 +286,7 @@ export default function LessonPlayer({ course, sections, allLessons, currentLess
             <div className="flex items-center justify-between pt-4" style={{ borderTop: '1px solid var(--b-line)' }}>
               <button
                 className="btn btn-secondary flex items-center gap-2"
+                style={{ minHeight: 44 }}
                 onClick={() => prevLesson && goLesson(prevLesson.id)}
                 disabled={!prevLesson}
               >
@@ -249,6 +298,7 @@ export default function LessonPlayer({ course, sections, allLessons, currentLess
               </span>
               <button
                 className="btn btn-primary flex items-center gap-2"
+                style={{ minHeight: 44 }}
                 onClick={() => nextLesson && goLesson(nextLesson.id)}
                 disabled={!nextLesson}
               >

@@ -1,7 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import TopNav from '@/components/layout/TopNav'
+import MobileBottomNav from '@/components/layout/MobileBottomNav'
 import Icon from '@/components/shared/Icon'
 import { useLang } from '@/components/providers/LangProvider'
 
@@ -34,6 +36,7 @@ const GRAD_MAP: Record<string, number> = {
 
 export default function StudentDashboard({ profile, enrollments }: Props) {
   const { lang, t } = useLang()
+  const router = useRouter()
 
   function tr(kk: string, ru: string, en: string) {
     if (lang === 'ru') return ru || kk
@@ -43,14 +46,15 @@ export default function StudentDashboard({ profile, enrollments }: Props) {
 
   const completedCount = enrollments.filter(e => e.progress_pct >= 100).length
   const inProgressCount = enrollments.filter(e => e.progress_pct > 0 && e.progress_pct < 100).length
+  const continueEnroll = enrollments.find(e => e.progress_pct > 0 && e.progress_pct < 100)
 
   return (
     <div style={{ background: 'var(--b-bg)', minHeight: '100vh' }}>
       <TopNav user={profile} />
 
-      <div className="max-w-[1280px] mx-auto px-8 py-10">
+      <div className="max-w-[1280px] mx-auto px-4 md:px-8 py-6 md:py-10 pb-24 md:pb-10">
         {/* Сәлем */}
-        <div className="flex items-center gap-4 mb-10">
+        <div className="flex items-center gap-4 mb-6 md:mb-10">
           <div className="b-avatar" style={{ width: 56, height: 56, fontSize: 22, background: 'var(--b-primary)', color: '#fff' }}>
             {profile?.full_name?.[0] ?? '?'}
           </div>
@@ -61,17 +65,77 @@ export default function StudentDashboard({ profile, enrollments }: Props) {
                : `Привет, ${profile?.full_name?.split(' ')[0] ?? ''}!`}
             </h1>
             <p className="b-sm mt-1" style={{ color: 'var(--b-text-3)' }}>
-              {lang === 'kk' ? 'Оқуды жалғастыр' : lang === 'en' ? 'Keep learning' : 'Продолжай учиться'}
+              {lang === 'kk' ? 'Бүгін не үйренеміз?' : lang === 'en' ? "What's learning today?" : 'Что изучим сегодня?'}
             </p>
           </div>
-          <Link href="/settings" className="btn btn-secondary btn-sm flex items-center gap-2">
+          <Link href="/settings" className="btn btn-secondary btn-sm hidden md:flex items-center gap-2">
             <Icon name="settings" size={14} />
             {lang === 'kk' ? 'Параметрлер' : lang === 'en' ? 'Settings' : 'Настройки'}
           </Link>
         </div>
 
+        {/* Мобильді іздеу */}
+        <div className="md:hidden mb-5 relative">
+          <Icon
+            name="search" size={16}
+            style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--b-text-4)', zIndex: 1 }}
+          />
+          <input
+            className="inp w-full"
+            placeholder={lang === 'kk' ? 'Курс іздеу…' : lang === 'en' ? 'Search courses…' : 'Поиск курсов…'}
+            style={{ paddingLeft: 40, background: 'var(--b-bg-soft)', border: 'none' }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const val = (e.target as HTMLInputElement).value.trim()
+                if (val) router.push(`/courses?q=${encodeURIComponent(val)}`)
+              }
+            }}
+          />
+        </div>
+
+        {/* Жалғастыру карточкасы — тек мобильде */}
+        {continueEnroll?.course && (
+          <div className="md:hidden mb-6">
+            <div
+              className="card"
+              style={{ display: 'flex', padding: 0, background: 'var(--b-primary)', border: 'none', overflow: 'hidden' }}
+            >
+              <div
+                className={`thumb-grad-${GRAD_MAP[continueEnroll.course.category?.slug ?? ''] ?? 1} thumb-pattern`}
+                style={{ width: 100, flexShrink: 0 }}
+              />
+              <div style={{ flex: 1, padding: 14, color: '#fff' }}>
+                <div className="b-xs" style={{ color: 'rgba(255,255,255,0.6)', marginBottom: 4 }}>
+                  {lang === 'kk' ? 'Жалғастыру' : lang === 'en' ? 'Continue' : 'Продолжить'} · {Math.round(continueEnroll.progress_pct)}%
+                </div>
+                <div className="b-sm" style={{ fontWeight: 600, marginBottom: 10, lineHeight: 1.3 }}>
+                  {tr(continueEnroll.course.title_kk, continueEnroll.course.title_ru, continueEnroll.course.title_en).slice(0, 50)}
+                </div>
+                <div className="progress" style={{ background: 'rgba(255,255,255,0.2)', marginBottom: 10 }}>
+                  <div className="progress-bar" style={{ width: `${continueEnroll.progress_pct}%`, background: 'var(--b-accent)' }} />
+                </div>
+                <Link
+                  href={`/courses/${continueEnroll.course.slug}/learn`}
+                  className="btn btn-accent btn-sm"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                >
+                  <Icon name="play" size={10} />
+                  {lang === 'kk' ? 'Жалғастыру' : lang === 'en' ? 'Continue' : 'Продолжить'}
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Статистика */}
-        <div className="grid gap-5 mb-10" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+        <style>{`
+          .dash-stats { grid-template-columns: repeat(3,1fr); }
+          @media(max-width:640px){ .dash-stats { grid-template-columns: 1fr; } }
+          .dash-courses { grid-template-columns: repeat(3,1fr); }
+          @media(max-width:560px){ .dash-courses { grid-template-columns: 1fr; } }
+          @media(min-width:561px) and (max-width:900px){ .dash-courses { grid-template-columns: repeat(2,1fr); } }
+        `}</style>
+        <div className="dash-stats grid gap-4 mb-8">
           {[
             { icon: 'book',   label: t.nav.myCourses,                 value: enrollments.length },
             { icon: 'chart',  label: lang === 'kk' ? 'Аяқталуда' : lang === 'en' ? 'In progress' : 'В процессе', value: inProgressCount },
@@ -112,7 +176,7 @@ export default function StudentDashboard({ profile, enrollments }: Props) {
             </Link>
           </div>
         ) : (
-          <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+          <div className="dash-courses grid gap-4 md:gap-5">
             {enrollments.map(enroll => {
               const course = enroll.course
               if (!course) return null
@@ -178,6 +242,8 @@ export default function StudentDashboard({ profile, enrollments }: Props) {
           </div>
         )}
       </div>
+
+      <MobileBottomNav />
     </div>
   )
 }

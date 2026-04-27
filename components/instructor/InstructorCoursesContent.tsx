@@ -31,7 +31,7 @@ export default function InstructorCoursesContent({ courses }: { courses: Course[
 
   const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> = {
     published: { label: t.instructor.published, color: '#059669', bg: '#d1fae5' },
-    draft:     { label: t.instructor.draft,     color: '#6b7280', bg: 'var(--b-surface-2)' },
+    draft:     { label: t.instructor.draft,     color: '#6b7280', bg: 'var(--b-bg-soft)' },
     pending:   { label: t.instructor.pending,   color: '#d97706', bg: '#fef3c7' },
     rejected:  { label: t.instructor.rejected,  color: '#dc2626', bg: '#fee2e2' },
   }
@@ -47,8 +47,15 @@ export default function InstructorCoursesContent({ courses }: { courses: Course[
   ] as const
 
   return (
-    <div style={{ padding: '40px 48px' }}>
-      <div className="flex items-center justify-between mb-8">
+    <div className="instr-courses">
+      <style>{`
+        .instr-courses { padding: 24px 16px; }
+        @media (min-width: 768px) { .instr-courses { padding: 40px 48px; } }
+        .courses-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .courses-table-grid { min-width: 600px; }
+      `}</style>
+
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
           <div className="b-eyebrow mb-1">{t.instructor.title}</div>
           <h1 className="b-h1">{t.instructor.myCourses}</h1>
@@ -60,7 +67,7 @@ export default function InstructorCoursesContent({ courses }: { courses: Course[
       </div>
 
       {/* Сүзгілер */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6">
         {FILTERS.map(f => (
           <button
             key={f.key}
@@ -83,90 +90,92 @@ export default function InstructorCoursesContent({ courses }: { courses: Course[
         </div>
       ) : (
         <div className="card overflow-hidden">
-          {/* Кесте тақырыбы */}
-          <div
-            className="grid px-6 py-3 b-xs font-semibold uppercase"
-            style={{
-              gridTemplateColumns: '3fr 1fr 1fr 1fr 100px',
-              color: 'var(--b-text-3)',
-              borderBottom: '1px solid var(--b-line)',
-              letterSpacing: '0.06em',
-            }}
-          >
-            <span>{t.instructor.courseTitle}</span>
-            <span>{t.instructor.coursePrice}</span>
-            <span>{t.instructor.totalStudents}</span>
-            <span>{t.instructor.avgRating}</span>
-            <span></span>
+          <div className="courses-table-wrap">
+            {/* Кесте тақырыбы */}
+            <div
+              className="courses-table-grid grid px-6 py-3 b-xs font-semibold uppercase"
+              style={{
+                gridTemplateColumns: '3fr 1fr 1fr 1fr 80px',
+                color: 'var(--b-text-3)',
+                borderBottom: '1px solid var(--b-line)',
+                letterSpacing: '0.06em',
+              }}
+            >
+              <span>{t.instructor.courseTitle}</span>
+              <span>{t.instructor.coursePrice}</span>
+              <span>{t.instructor.totalStudents}</span>
+              <span>{t.instructor.avgRating}</span>
+              <span></span>
+            </div>
+
+            {filtered.map((course, i) => {
+              const s = STATUS_MAP[course.status] ?? STATUS_MAP.draft
+              return (
+                <div
+                  key={course.id}
+                  className="courses-table-grid grid px-6 py-4 items-center"
+                  style={{
+                    gridTemplateColumns: '3fr 1fr 1fr 1fr 80px',
+                    borderBottom: i < filtered.length - 1 ? '1px solid var(--b-line-soft)' : 'none',
+                  }}
+                >
+                  {/* Атауы + статус */}
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div
+                      className={`thumb-grad-${(i % 8) + 1} rounded-lg shrink-0`}
+                      style={{ width: 48, height: 48 }}
+                    />
+                    <div className="min-w-0">
+                      <div className="b-sm font-semibold truncate">{title(course)}</div>
+                      <span
+                        className="text-xs font-semibold px-2 py-0.5 rounded-full mt-1 inline-block"
+                        style={{ color: s.color, background: s.bg }}
+                      >
+                        {s.label}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Баға */}
+                  <div>
+                    <div className="b-sm font-semibold">
+                      {course.price ? `${course.price.toLocaleString('ru-RU')} ₸` : t.common.free}
+                    </div>
+                    {course.discount_price && (
+                      <div className="b-xs line-through" style={{ color: 'var(--b-text-4)' }}>
+                        {course.discount_price.toLocaleString('ru-RU')} ₸
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Студент */}
+                  <div className="b-sm">{course.students_count ?? 0} {t.instructor.students}</div>
+
+                  {/* Рейтинг */}
+                  <div>
+                    {course.rating ? (
+                      <div className="flex items-center gap-1.5">
+                        <Stars value={course.rating} size={13} />
+                        <span className="b-xs">{course.rating.toFixed(1)}</span>
+                      </div>
+                    ) : (
+                      <span className="b-xs" style={{ color: 'var(--b-text-4)' }}>—</span>
+                    )}
+                  </div>
+
+                  {/* Әрекеттер */}
+                  <div className="flex items-center gap-1 justify-end">
+                    <Link href={`/instructor/courses/${course.id}/edit`} className="btn btn-ghost btn-sm" title={t.instructor.edit}>
+                      <Icon name="edit" size={14} />
+                    </Link>
+                    <Link href={`/courses/${course.id}`} className="btn btn-ghost btn-sm" title={t.instructor.viewCourse}>
+                      <Icon name="eye" size={14} />
+                    </Link>
+                  </div>
+                </div>
+              )
+            })}
           </div>
-
-          {filtered.map((course, i) => {
-            const s = STATUS_MAP[course.status] ?? STATUS_MAP.draft
-            return (
-              <div
-                key={course.id}
-                className="grid px-6 py-4 items-center"
-                style={{
-                  gridTemplateColumns: '3fr 1fr 1fr 1fr 100px',
-                  borderBottom: i < filtered.length - 1 ? '1px solid var(--b-line-soft)' : 'none',
-                }}
-              >
-                {/* Атауы + статус */}
-                <div className="flex items-center gap-4 min-w-0">
-                  <div
-                    className={`thumb-grad-${(i % 8) + 1} rounded-lg shrink-0`}
-                    style={{ width: 48, height: 48 }}
-                  />
-                  <div className="min-w-0">
-                    <div className="b-sm font-semibold truncate">{title(course)}</div>
-                    <span
-                      className="text-xs font-semibold px-2 py-0.5 rounded-full mt-1 inline-block"
-                      style={{ color: s.color, background: s.bg }}
-                    >
-                      {s.label}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Баға */}
-                <div>
-                  <div className="b-sm font-semibold">
-                    {course.price ? `${course.price.toLocaleString('ru-RU')} ₸` : t.common.free}
-                  </div>
-                  {course.discount_price && (
-                    <div className="b-xs line-through" style={{ color: 'var(--b-text-4)' }}>
-                      {course.discount_price.toLocaleString('ru-RU')} ₸
-                    </div>
-                  )}
-                </div>
-
-                {/* Студент */}
-                <div className="b-sm">{course.students_count ?? 0} {t.instructor.students}</div>
-
-                {/* Рейтинг */}
-                <div>
-                  {course.rating ? (
-                    <div className="flex items-center gap-1.5">
-                      <Stars value={course.rating} size={13} />
-                      <span className="b-xs">{course.rating.toFixed(1)}</span>
-                    </div>
-                  ) : (
-                    <span className="b-xs" style={{ color: 'var(--b-text-4)' }}>—</span>
-                  )}
-                </div>
-
-                {/* Әрекеттер */}
-                <div className="flex items-center gap-1 justify-end">
-                  <Link href={`/instructor/courses/${course.id}/edit`} className="btn btn-ghost btn-sm" title={t.instructor.edit}>
-                    <Icon name="edit" size={14} />
-                  </Link>
-                  <Link href={`/courses/${course.id}`} className="btn btn-ghost btn-sm" title={t.instructor.viewCourse}>
-                    <Icon name="eye" size={14} />
-                  </Link>
-                </div>
-              </div>
-            )
-          })}
         </div>
       )}
     </div>

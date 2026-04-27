@@ -72,14 +72,20 @@ export default function AdminCoursesContent({ courses, statusFilter, reviewId }:
   }
 
   return (
-    <div style={{ padding: '40px 48px' }}>
+    <div className="admin-courses-wrap">
+      <style>{`
+        .admin-courses-wrap { padding: 24px 16px; }
+        @media (min-width: 768px) { .admin-courses-wrap { padding: 40px 48px; } }
+        .admin-courses-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .admin-courses-table { min-width: 680px; }
+      `}</style>
       <div className="mb-8">
         <div className="b-eyebrow mb-1">Admin</div>
         <h1 className="b-h1">{lang === 'kk' ? 'Курстар' : lang === 'en' ? 'Courses' : 'Курсы'}</h1>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6">
         {STATUS_TABS.map(s => (
           <Link
             key={s}
@@ -97,7 +103,8 @@ export default function AdminCoursesContent({ courses, statusFilter, reviewId }:
 
       {/* Table */}
       <div className="card overflow-hidden">
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div className="admin-courses-table-wrap">
+        <table className="admin-courses-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--b-line)', background: 'var(--b-bg-soft)' }}>
               {[
@@ -166,6 +173,7 @@ export default function AdminCoursesContent({ courses, statusFilter, reviewId }:
             })}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Review modal */}

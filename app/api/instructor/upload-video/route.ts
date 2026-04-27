@@ -2,13 +2,12 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import Mux from '@mux/mux-node'
 
-const mux = new Mux({
-  tokenId:     process.env.MUX_TOKEN_ID!,
-  tokenSecret: process.env.MUX_TOKEN_SECRET!,
-})
-
 // Mux direct upload URL жасайды
 export async function POST(_req: Request) {
+  const mux = new Mux({
+    tokenId:     process.env.MUX_TOKEN_ID!,
+    tokenSecret: process.env.MUX_TOKEN_SECRET!,
+  })
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 

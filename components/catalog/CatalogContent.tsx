@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import TopNav from '@/components/layout/TopNav'
+import MobileBottomNav from '@/components/layout/MobileBottomNav'
 import Icon from '@/components/shared/Icon'
 import Stars from '@/components/shared/Stars'
 import { useLang } from '@/components/providers/LangProvider'
@@ -89,20 +90,20 @@ export default function CatalogContent({ courses, categories, total, page, pageS
     <div style={{ background: 'var(--b-bg)', minHeight: '100vh' }}>
       <TopNav />
 
-      <div className="max-w-[1280px] mx-auto px-8 py-10">
+      <div className="max-w-[1280px] mx-auto px-4 md:px-8 py-6 md:py-10 pb-24 md:pb-10">
         {/* Тақырып + іздеу */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
           <div>
-            <h1 className="b-h1">{t.home.catalog}</h1>
+            <h1 className="b-h1" style={{ fontSize: 'clamp(24px, 4vw, 40px)' }}>{t.home.catalog}</h1>
             <p className="b-sm mt-1" style={{ color: 'var(--b-text-3)' }}>
               {total.toLocaleString('ru-RU')} {t.home.courses}
             </p>
           </div>
-          <form onSubmit={handleSearch} className="relative">
+          <form onSubmit={handleSearch} className="relative w-full sm:w-auto">
             <Icon name="search" size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--b-text-4)' }} />
             <input
               className="inp"
-              style={{ paddingLeft: 36, width: 280 }}
+              style={{ paddingLeft: 36, width: '100%', maxWidth: 280 }}
               placeholder={t.nav.search}
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -110,9 +111,9 @@ export default function CatalogContent({ courses, categories, total, page, pageS
           </form>
         </div>
 
-        <div className="flex gap-8">
+        <div className="flex flex-col md:flex-row gap-6 md:gap-8">
           {/* Сүзгі панелі */}
-          <aside style={{ width: 220, flexShrink: 0 }}>
+          <aside style={{ width: '100%', maxWidth: '100%', flexShrink: 0 }} className="md:w-[220px] md:max-w-[220px]">
             {/* Категориялар */}
             <div className="mb-6">
               <div className="b-eyebrow mb-3">{t.home.categories}</div>
@@ -203,7 +204,12 @@ export default function CatalogContent({ courses, categories, total, page, pageS
               </div>
             ) : (
               <>
-                <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+                <style>{`
+                  .catalog-grid { grid-template-columns: 1fr; }
+                  @media(min-width:560px){ .catalog-grid { grid-template-columns: repeat(2,1fr); } }
+                  @media(min-width:900px){ .catalog-grid { grid-template-columns: repeat(3,1fr); } }
+                `}</style>
+                <div className="catalog-grid grid gap-4 md:gap-5">
                   {courses.map((course, i) => {
                     const grad = GRAD_MAP[course.category?.slug ?? ''] ?? ((i % 8) + 1)
                     return (
@@ -305,6 +311,8 @@ export default function CatalogContent({ courses, categories, total, page, pageS
           <span>KZ · RU · EN</span>
         </div>
       </footer>
+
+      <MobileBottomNav />
     </div>
   )
 }

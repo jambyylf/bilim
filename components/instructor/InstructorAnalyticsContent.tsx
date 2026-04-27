@@ -32,7 +32,16 @@ export default function InstructorAnalyticsContent({ courseStats, totalStudents,
     : 0
 
   return (
-    <div style={{ padding: '40px 48px' }}>
+    <div className="instr-analytics">
+      <style>{`
+        .instr-analytics { padding: 24px 16px; }
+        @media (min-width: 768px) { .instr-analytics { padding: 40px 48px; } }
+        .analytics-kpi { grid-template-columns: repeat(2, 1fr); }
+        @media (min-width: 640px) { .analytics-kpi { grid-template-columns: repeat(4, 1fr); } }
+        .analytics-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .analytics-table { min-width: 600px; }
+      `}</style>
+
       <div className="mb-8">
         <div className="b-eyebrow mb-1">
           {lang === 'kk' ? 'Нұсқаушы' : lang === 'en' ? 'Instructor' : 'Инструктор'}
@@ -43,12 +52,12 @@ export default function InstructorAnalyticsContent({ courseStats, totalStudents,
       </div>
 
       {/* KPI */}
-      <div className="grid gap-5 mb-8" style={{ gridTemplateColumns: 'repeat(4,1fr)' }}>
+      <div className="analytics-kpi grid gap-4 mb-8">
         {[
-          { label: lang === 'kk' ? 'Барлық студент' : lang === 'en' ? 'Total students' : 'Всего студентов', value: totalStudents, color: '#3B82F6', bg: '#eff6ff' },
-          { label: lang === 'kk' ? 'Курстар' : lang === 'en' ? 'Courses' : 'Курсы', value: courseStats.length, color: '#8B5CF6', bg: '#f5f3ff' },
-          { label: lang === 'kk' ? 'Аяқтаған' : lang === 'en' ? 'Completed' : 'Завершили', value: totalCompleted, color: '#059669', bg: '#d1fae5' },
-          { label: lang === 'kk' ? 'Орт. аяқтау %' : lang === 'en' ? 'Avg completion' : 'Ср. завершение', value: `${avgCompletion}%`, color: '#F59E0B', bg: '#fef3c7' },
+          { label: lang === 'kk' ? 'Барлық студент' : lang === 'en' ? 'Total students' : 'Всего студентов', value: totalStudents, color: '#3B82F6' },
+          { label: lang === 'kk' ? 'Курстар' : lang === 'en' ? 'Courses' : 'Курсы', value: courseStats.length, color: '#8B5CF6' },
+          { label: lang === 'kk' ? 'Аяқтаған' : lang === 'en' ? 'Completed' : 'Завершили', value: totalCompleted, color: '#059669' },
+          { label: lang === 'kk' ? 'Орт. аяқтау %' : lang === 'en' ? 'Avg completion' : 'Ср. завершение', value: `${avgCompletion}%`, color: '#F59E0B' },
         ].map(({ label, value, color }) => (
           <div key={label} className="card p-5">
             <div className="b-xs mb-1" style={{ color: 'var(--b-text-3)' }}>{label}</div>
@@ -64,64 +73,66 @@ export default function InstructorAnalyticsContent({ courseStats, totalStudents,
             {lang === 'kk' ? 'Курс бойынша статистика' : lang === 'en' ? 'Course statistics' : 'Статистика по курсам'}
           </div>
         </div>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid var(--b-line)', background: 'var(--b-bg-soft)' }}>
-              {[
-                lang === 'kk' ? 'Курс' : lang === 'en' ? 'Course' : 'Курс',
-                lang === 'kk' ? 'Студенттер' : lang === 'en' ? 'Students' : 'Студентов',
-                lang === 'kk' ? 'Аяқтаған' : lang === 'en' ? 'Completed' : 'Завершили',
-                lang === 'kk' ? 'Аяқтау %' : lang === 'en' ? 'Completion %' : 'Завершение %',
-                lang === 'kk' ? 'Орт. прогресс' : lang === 'en' ? 'Avg progress' : 'Ср. прогресс',
-              ].map(h => (
-                <th key={h} className="b-xs font-semibold text-left px-5 py-3" style={{ color: 'var(--b-text-3)' }}>{h}</th>
+        <div className="analytics-table-wrap">
+          <table className="analytics-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--b-line)', background: 'var(--b-bg-soft)' }}>
+                {[
+                  lang === 'kk' ? 'Курс' : lang === 'en' ? 'Course' : 'Курс',
+                  lang === 'kk' ? 'Студенттер' : lang === 'en' ? 'Students' : 'Студентов',
+                  lang === 'kk' ? 'Аяқтаған' : lang === 'en' ? 'Completed' : 'Завершили',
+                  lang === 'kk' ? 'Аяқтау %' : lang === 'en' ? 'Completion %' : 'Завершение %',
+                  lang === 'kk' ? 'Орт. прогресс' : lang === 'en' ? 'Avg progress' : 'Ср. прогресс',
+                ].map(h => (
+                  <th key={h} className="b-xs font-semibold text-left px-5 py-3" style={{ color: 'var(--b-text-3)' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {courseStats.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="text-center p-8 b-sm" style={{ color: 'var(--b-text-3)' }}>
+                    {lang === 'kk' ? 'Курстар жоқ' : lang === 'en' ? 'No courses yet' : 'Курсов пока нет'}
+                  </td>
+                </tr>
+              ) : courseStats.map(c => (
+                <tr key={c.id} style={{ borderBottom: '1px solid var(--b-line-soft)' }}>
+                  <td className="px-5 py-4">
+                    <div className="b-sm font-medium" style={{ maxWidth: 220 }}>{ct(c)}</div>
+                  </td>
+                  <td className="px-5 py-4 b-sm font-semibold">{c.students}</td>
+                  <td className="px-5 py-4 b-sm">{c.completed}</td>
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-2">
+                      <div style={{ flex: 1, height: 6, background: 'var(--b-bg-soft)', borderRadius: 3, overflow: 'hidden', minWidth: 60 }}>
+                        <div style={{
+                          width: `${c.completionRate}%`,
+                          height: '100%',
+                          background: c.completionRate >= 70 ? '#059669' : c.completionRate >= 40 ? '#F59E0B' : '#dc2626',
+                          borderRadius: 3,
+                        }} />
+                      </div>
+                      <span className="b-xs font-semibold" style={{ width: 32, color: 'var(--b-text-2)' }}>{c.completionRate}%</span>
+                    </div>
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-2">
+                      <div style={{ flex: 1, height: 6, background: 'var(--b-bg-soft)', borderRadius: 3, overflow: 'hidden', minWidth: 60 }}>
+                        <div style={{
+                          width: `${c.avgProgress}%`,
+                          height: '100%',
+                          background: 'var(--b-primary)',
+                          borderRadius: 3,
+                        }} />
+                      </div>
+                      <span className="b-xs font-semibold" style={{ width: 32, color: 'var(--b-text-2)' }}>{c.avgProgress}%</span>
+                    </div>
+                  </td>
+                </tr>
               ))}
-            </tr>
-          </thead>
-          <tbody>
-            {courseStats.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="text-center p-8 b-sm" style={{ color: 'var(--b-text-3)' }}>
-                  {lang === 'kk' ? 'Курстар жоқ' : lang === 'en' ? 'No courses yet' : 'Курсов пока нет'}
-                </td>
-              </tr>
-            ) : courseStats.map(c => (
-              <tr key={c.id} style={{ borderBottom: '1px solid var(--b-line-soft)' }}>
-                <td className="px-5 py-4">
-                  <div className="b-sm font-medium" style={{ maxWidth: 220 }}>{ct(c)}</div>
-                </td>
-                <td className="px-5 py-4 b-sm font-semibold">{c.students}</td>
-                <td className="px-5 py-4 b-sm">{c.completed}</td>
-                <td className="px-5 py-4">
-                  <div className="flex items-center gap-2">
-                    <div style={{ flex: 1, height: 6, background: 'var(--b-bg-soft)', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{
-                        width: `${c.completionRate}%`,
-                        height: '100%',
-                        background: c.completionRate >= 70 ? '#059669' : c.completionRate >= 40 ? '#F59E0B' : '#dc2626',
-                        borderRadius: 3,
-                      }} />
-                    </div>
-                    <span className="b-xs font-semibold" style={{ width: 32, color: 'var(--b-text-2)' }}>{c.completionRate}%</span>
-                  </div>
-                </td>
-                <td className="px-5 py-4">
-                  <div className="flex items-center gap-2">
-                    <div style={{ flex: 1, height: 6, background: 'var(--b-bg-soft)', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{
-                        width: `${c.avgProgress}%`,
-                        height: '100%',
-                        background: 'var(--b-primary)',
-                        borderRadius: 3,
-                      }} />
-                    </div>
-                    <span className="b-xs font-semibold" style={{ width: 32, color: 'var(--b-text-2)' }}>{c.avgProgress}%</span>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )

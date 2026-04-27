@@ -50,7 +50,11 @@ export default function InstructorSettingsContent({ profile }: { profile: Profil
   }
 
   return (
-    <div style={{ padding: '40px 48px' }}>
+    <div className="instr-settings-wrap">
+      <style>{`
+        .instr-settings-wrap { padding: 24px 16px; }
+        @media (min-width: 768px) { .instr-settings-wrap { padding: 40px 48px; } }
+      `}</style>
       <div className="mb-8">
         <div className="b-eyebrow mb-1">
           {lang === 'kk' ? 'Нұсқаушы' : lang === 'en' ? 'Instructor' : 'Инструктор'}

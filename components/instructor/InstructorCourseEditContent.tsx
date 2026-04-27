@@ -110,9 +110,15 @@ export default function InstructorCourseEditContent({ course, sections, lessons 
   }
 
   return (
-    <div style={{ padding: '40px 48px' }}>
+    <div className="course-edit-wrap">
+      <style>{`
+        .course-edit-wrap { padding: 24px 16px; }
+        @media (min-width: 768px) { .course-edit-wrap { padding: 40px 48px; } }
+        .course-edit-grid { grid-template-columns: 1fr; }
+        @media (min-width: 900px) { .course-edit-grid { grid-template-columns: 1.4fr 1fr; } }
+      `}</style>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
           <div className="b-eyebrow mb-1">
             {lang === 'kk' ? 'Курсты өңдеу' : lang === 'en' ? 'Edit course' : 'Редактировать курс'}
@@ -184,7 +190,7 @@ export default function InstructorCourseEditContent({ course, sections, lessons 
           ))}
 
           {/* Price / Level / Language */}
-          <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+          <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
             <div>
               <label className="b-label mb-1.5 block">
                 {lang === 'kk' ? 'Баға (₸)' : lang === 'en' ? 'Price (₸)' : 'Цена (₸)'}

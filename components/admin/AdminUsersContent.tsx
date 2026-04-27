@@ -65,7 +65,15 @@ export default function AdminUsersContent({ users, roleFilter, searchQuery }: Pr
   }
 
   return (
-    <div style={{ padding: '40px 48px' }}>
+    <div className="admin-users-wrap">
+      <style>{`
+        .admin-users-wrap { padding: 24px 16px; }
+        @media (min-width: 768px) { .admin-users-wrap { padding: 40px 48px; } }
+        .admin-users-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .admin-users-table { min-width: 640px; }
+        .users-filters { flex-direction: column; align-items: flex-start; gap: 10px; }
+        @media (min-width: 640px) { .users-filters { flex-direction: row; align-items: center; } }
+      `}</style>
       <div className="mb-8">
         <div className="b-eyebrow mb-1">Admin</div>
         <h1 className="b-h1">
@@ -74,8 +82,8 @@ export default function AdminUsersContent({ users, roleFilter, searchQuery }: Pr
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-4 mb-6">
-        <div className="flex gap-2">
+      <div className="users-filters flex mb-6">
+        <div className="flex flex-wrap gap-2">
           {ROLE_TABS.map(r => (
             <Link key={r}
               href={`/admin/users${r === 'all' ? (search ? `?q=${search}` : '') : `?role=${r}${search ? `&q=${search}` : ''}`}`}
@@ -92,7 +100,7 @@ export default function AdminUsersContent({ users, roleFilter, searchQuery }: Pr
 
         <form onSubmit={handleSearch} className="flex gap-2 ml-auto">
           <input
-            className="input"
+            className="inp"
             placeholder={lang === 'kk' ? 'Іздеу...' : lang === 'en' ? 'Search...' : 'Поиск...'}
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -105,7 +113,8 @@ export default function AdminUsersContent({ users, roleFilter, searchQuery }: Pr
       </div>
 
       <div className="card overflow-hidden">
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div className="admin-users-table-wrap">
+        <table className="admin-users-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--b-line)', background: 'var(--b-bg-soft)' }}>
               {[
@@ -153,7 +162,7 @@ export default function AdminUsersContent({ users, roleFilter, searchQuery }: Pr
                       value={u.role}
                       disabled={changing === u.id}
                       onChange={e => changeRole(u.id, e.target.value)}
-                      className="input"
+                      className="inp"
                       style={{ padding: '4px 8px', fontSize: 13, width: 140 }}
                     >
                       <option value="student">{roleName('student')}</option>
@@ -166,6 +175,7 @@ export default function AdminUsersContent({ users, roleFilter, searchQuery }: Pr
             })}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )

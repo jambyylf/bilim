@@ -44,16 +44,13 @@ export default function InstructorDashboardContent({ courses, reviews, totalStud
   function statusChip(status: string) {
     const map: Record<string, { label: string; color: string; bg: string }> = {
       published: { label: t.instructor.published, color: '#059669', bg: '#d1fae5' },
-      draft:     { label: t.instructor.draft,     color: '#6b7280', bg: 'var(--b-surface-2)' },
+      draft:     { label: t.instructor.draft,     color: '#6b7280', bg: 'var(--b-bg-soft)' },
       pending:   { label: t.instructor.pending,   color: '#d97706', bg: '#fef3c7' },
       rejected:  { label: t.instructor.rejected,  color: '#dc2626', bg: '#fee2e2' },
     }
     const s = map[status] ?? map.draft
     return (
-      <span
-        className="text-xs font-semibold px-2 py-0.5 rounded-full"
-        style={{ color: s.color, background: s.bg }}
-      >
+      <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ color: s.color, background: s.bg }}>
         {s.label}
       </span>
     )
@@ -67,24 +64,30 @@ export default function InstructorDashboardContent({ courses, reviews, totalStud
   ]
 
   return (
-    <div style={{ padding: '40px 48px', maxWidth: 1100 }}>
+    <div className="instr-content">
+      <style>{`
+        .instr-content { padding: 24px 16px; max-width: 1100px; }
+        @media (min-width: 768px) { .instr-content { padding: 40px 48px; } }
+        .instr-kpi { grid-template-columns: repeat(2, 1fr); }
+        @media (min-width: 640px) { .instr-kpi { grid-template-columns: repeat(4, 1fr); } }
+        .instr-main-grid { grid-template-columns: 1fr; }
+        @media (min-width: 900px) { .instr-main-grid { grid-template-columns: 1.6fr 1fr; } }
+      `}</style>
+
       {/* Тақырып */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
           <div className="b-eyebrow mb-1">{t.instructor.title}</div>
           <h1 className="b-h1">{t.instructor.dashboard}</h1>
         </div>
-        <Link
-          href="/instructor/courses/new"
-          className="btn btn-primary flex items-center gap-2"
-        >
+        <Link href="/instructor/courses/new" className="btn btn-primary flex items-center gap-2">
           <Icon name="plus" size={15} />
           {t.instructor.createCourse}
         </Link>
       </div>
 
       {/* KPI карточкалары */}
-      <div className="grid gap-5 mb-8" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+      <div className="instr-kpi grid gap-4 mb-8">
         {KPI.map(({ icon, label, value, sub }) => (
           <div key={label} className="card p-5">
             <div className="flex items-center justify-between mb-4">
@@ -100,7 +103,7 @@ export default function InstructorDashboardContent({ courses, reviews, totalStud
       </div>
 
       {/* Курстар кестесі + Соңғы пікірлер */}
-      <div className="grid gap-6" style={{ gridTemplateColumns: '1.6fr 1fr' }}>
+      <div className="instr-main-grid grid gap-6">
 
         {/* Курстар */}
         <div className="card overflow-hidden">
@@ -125,7 +128,6 @@ export default function InstructorDashboardContent({ courses, reviews, totalStud
                   className="flex items-center gap-4 px-5 py-4"
                   style={{ borderBottom: '1px solid var(--b-line-soft)' }}
                 >
-                  {/* Градиент миниатюра */}
                   <div
                     className={`thumb-grad-${(courses.indexOf(course) % 8) + 1} rounded-lg shrink-0`}
                     style={{ width: 44, height: 44 }}
@@ -173,11 +175,7 @@ export default function InstructorDashboardContent({ courses, reviews, totalStud
           ) : (
             <div>
               {reviews.map(review => (
-                <div
-                  key={review.id}
-                  className="px-5 py-4"
-                  style={{ borderBottom: '1px solid var(--b-line-soft)' }}
-                >
+                <div key={review.id} className="px-5 py-4" style={{ borderBottom: '1px solid var(--b-line-soft)' }}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="b-sm font-semibold">{review.student_id.slice(0, 8)}…</div>
                     <Stars value={review.rating} size={12} />

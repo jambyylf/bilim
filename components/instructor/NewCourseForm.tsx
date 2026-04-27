@@ -155,7 +155,7 @@ export default function NewCourseForm({ categories }: Props) {
           section_id:  section.id,
           course_id:   course.id,
           title_kk:    les.titleKk || '—',
-          title_ru:    les.titleKk || '—',
+          title_ru:    les.titleRu || '—',
           order_idx:   li,
           is_preview:  les.freePreview,
         })

@@ -25,7 +25,6 @@ interface Props {
 
 type PayMethod = 'stripe' | 'kaspi'
 
-
 export default function CheckoutContent({ course, userId, userEmail, profile }: Props) {
   const { lang, t } = useLang()
   const router = useRouter()
@@ -35,7 +34,6 @@ export default function CheckoutContent({ course, userId, userEmail, profile }: 
   const [error, setError] = useState('')
 
   const price = course.discount_price ?? course.price
-  const commission = Math.round(price * 0.2)
 
   function tr(kk: string, ru: string, en: string) {
     if (lang === 'ru') return ru || kk
@@ -55,8 +53,6 @@ export default function CheckoutContent({ course, userId, userEmail, profile }: 
         })
         const data = await res.json()
         if (!res.ok) throw new Error(data.error)
-        // Stripe Elements бар болса осында mount болады
-        // Демо режимде тікелей success бетіне жіберіледі
         router.push(`/checkout/success?order=${data.orderId}`)
       } else {
         const res = await fetch('/api/payment/kaspi/create', {
@@ -66,7 +62,6 @@ export default function CheckoutContent({ course, userId, userEmail, profile }: 
         })
         const data = await res.json()
         if (!res.ok) throw new Error(data.error)
-        // Kaspi Pay redirect URL-ге жіберіледі
         if (data.redirectUrl) {
           window.location.href = data.redirectUrl
         } else {
@@ -83,9 +78,16 @@ export default function CheckoutContent({ course, userId, userEmail, profile }: 
     <div style={{ background: 'var(--b-bg)', minHeight: '100vh' }}>
       <TopNav />
 
-      <div className="max-w-[900px] mx-auto px-8 py-12">
+      <style>{`
+        .checkout-grid { grid-template-columns: 1fr; }
+        @media (min-width: 768px) { .checkout-grid { grid-template-columns: 1fr 360px; } }
+        .checkout-summary-sticky { position: static; }
+        @media (min-width: 768px) { .checkout-summary-sticky { position: sticky; top: 80px; } }
+      `}</style>
+
+      <div className="max-w-[900px] mx-auto px-4 md:px-8 py-8 md:py-12">
         {/* Хлебные крошки */}
-        <div className="flex items-center gap-2 b-sm mb-8" style={{ color: 'var(--b-text-3)' }}>
+        <div className="flex items-center gap-2 b-sm mb-6 flex-wrap" style={{ color: 'var(--b-text-3)' }}>
           <Link href="/courses" style={{ color: 'var(--b-primary)' }}>{t.home.catalog}</Link>
           <span>/</span>
           <Link href={`/courses/${course.slug}`} style={{ color: 'var(--b-primary)' }}>
@@ -95,14 +97,18 @@ export default function CheckoutContent({ course, userId, userEmail, profile }: 
           <span>{lang === 'kk' ? 'Төлем' : lang === 'en' ? 'Checkout' : 'Оплата'}</span>
         </div>
 
-        <h1 className="b-h1 mb-8">{lang === 'kk' ? 'Төлем' : lang === 'en' ? 'Checkout' : 'Оформление заказа'}</h1>
+        <h1 className="b-h1 mb-6 md:mb-8">
+          {lang === 'kk' ? 'Төлем' : lang === 'en' ? 'Checkout' : 'Оформление заказа'}
+        </h1>
 
-        <div className="grid gap-8" style={{ gridTemplateColumns: '1fr 380px' }}>
+        <div className="checkout-grid grid gap-6">
           {/* Сол — төлем әдісі */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-5">
             {/* Төлем әдісін таңдау */}
-            <div className="card p-6">
-              <h2 className="b-h3 mb-5">{lang === 'kk' ? 'Төлем әдісі' : lang === 'en' ? 'Payment method' : 'Способ оплаты'}</h2>
+            <div className="card p-5 md:p-6">
+              <h2 className="b-h3 mb-5">
+                {lang === 'kk' ? 'Төлем әдісі' : lang === 'en' ? 'Payment method' : 'Способ оплаты'}
+              </h2>
               <div className="grid grid-cols-2 gap-3">
                 {([
                   {
@@ -114,7 +120,7 @@ export default function CheckoutContent({ course, userId, userEmail, profile }: 
                   {
                     id: 'kaspi' as const,
                     label: 'Kaspi Pay',
-                    sub: lang === 'kk' ? 'Kaspi Gold / QR' : lang === 'en' ? 'Kaspi Gold / QR' : 'Kaspi Gold / QR',
+                    sub: 'Kaspi Gold / QR',
                     icon: 'shield',
                   },
                 ] as const).map(opt => (
@@ -125,6 +131,7 @@ export default function CheckoutContent({ course, userId, userEmail, profile }: 
                     style={{
                       borderColor: method === opt.id ? 'var(--b-primary)' : 'var(--b-line)',
                       background:  method === opt.id ? 'var(--b-primary-50)' : 'var(--b-bg)',
+                      minHeight: 72,
                     }}
                   >
                     <div className="flex items-center gap-2">
@@ -138,11 +145,13 @@ export default function CheckoutContent({ course, userId, userEmail, profile }: 
 
               {method === 'stripe' && (
                 <div className="mt-5 p-4 rounded-xl" style={{ background: 'var(--b-bg-soft)', border: '1px solid var(--b-line)' }}>
-                  <div className="b-sm font-medium mb-3">{lang === 'kk' ? 'Карта деректері' : lang === 'en' ? 'Card details' : 'Данные карты'}</div>
-                  <input className="inp mb-3" placeholder="1234 5678 9012 3456" />
+                  <div className="b-sm font-medium mb-3">
+                    {lang === 'kk' ? 'Карта деректері' : lang === 'en' ? 'Card details' : 'Данные карты'}
+                  </div>
+                  <input className="inp mb-3" placeholder="1234 5678 9012 3456" style={{ minHeight: 44 }} />
                   <div className="grid grid-cols-2 gap-3">
-                    <input className="inp" placeholder="MM / YY" />
-                    <input className="inp" placeholder="CVV" />
+                    <input className="inp" placeholder="MM / YY" style={{ minHeight: 44 }} />
+                    <input className="inp" placeholder="CVV" style={{ minHeight: 44 }} />
                   </div>
                   <p className="b-xs mt-3" style={{ color: 'var(--b-text-4)' }}>
                     <Icon name="lock" size={11} style={{ display: 'inline', marginRight: 4 }} />
@@ -164,16 +173,18 @@ export default function CheckoutContent({ course, userId, userEmail, profile }: 
             </div>
 
             {/* Контакт деректері */}
-            <div className="card p-6">
-              <h2 className="b-h3 mb-5">{lang === 'kk' ? 'Байланыс' : lang === 'en' ? 'Contact info' : 'Контактные данные'}</h2>
+            <div className="card p-5 md:p-6">
+              <h2 className="b-h3 mb-5">
+                {lang === 'kk' ? 'Байланыс' : lang === 'en' ? 'Contact info' : 'Контактные данные'}
+              </h2>
               <div className="flex flex-col gap-4">
                 <div>
                   <label className="b-sm font-medium block mb-1.5">{t.auth.fullName}</label>
-                  <input className="inp" defaultValue={profile?.full_name ?? ''} readOnly />
+                  <input className="inp" defaultValue={profile?.full_name ?? ''} readOnly style={{ minHeight: 44 }} />
                 </div>
                 <div>
                   <label className="b-sm font-medium block mb-1.5">{t.auth.email}</label>
-                  <input className="inp" defaultValue={userEmail} readOnly />
+                  <input className="inp" defaultValue={userEmail} readOnly style={{ minHeight: 44 }} />
                 </div>
               </div>
             </div>
@@ -187,10 +198,11 @@ export default function CheckoutContent({ course, userId, userEmail, profile }: 
 
           {/* Оң — тапсырыс жиынтығы */}
           <div>
-            <div className="card p-6 sticky top-24">
-              <h2 className="b-h3 mb-5">{lang === 'kk' ? 'Тапсырыс' : lang === 'en' ? 'Order summary' : 'Ваш заказ'}</h2>
+            <div className="card p-5 md:p-6 checkout-summary-sticky">
+              <h2 className="b-h3 mb-5">
+                {lang === 'kk' ? 'Тапсырыс' : lang === 'en' ? 'Order summary' : 'Ваш заказ'}
+              </h2>
 
-              {/* Курс */}
               <div className="flex items-center gap-3 mb-5 pb-5" style={{ borderBottom: '1px solid var(--b-line)' }}>
                 <div className="thumb-grad-1 thumb-pattern rounded-lg shrink-0" style={{ width: 56, height: 56 }} />
                 <div className="flex-1 min-w-0">
@@ -199,7 +211,6 @@ export default function CheckoutContent({ course, userId, userEmail, profile }: 
                 </div>
               </div>
 
-              {/* Баға */}
               <div className="flex flex-col gap-2 mb-5 pb-5" style={{ borderBottom: '1px solid var(--b-line)' }}>
                 {course.discount_price && (
                   <div className="flex justify-between b-sm">
@@ -220,9 +231,10 @@ export default function CheckoutContent({ course, userId, userEmail, profile }: 
               </div>
 
               <button
-                className="btn btn-primary btn-fluid btn-lg w-full"
+                className="btn btn-primary btn-fluid w-full"
                 onClick={handlePay}
                 disabled={loading}
+                style={{ minHeight: 52, justifyContent: 'center' }}
               >
                 {loading ? t.common.loading : (
                   <>

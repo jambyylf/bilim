@@ -11,7 +11,7 @@ interface LogoProps {
 
 export default function Logo({
   color = '#1E3A8A',
-  textColor = '#111827',
+  textColor,
   size = 28,
   hideText = false,
   className,
@@ -26,12 +26,16 @@ export default function Logo({
           strokeWidth="1.8"
           fill="none"
         />
-        {/* Amber нүкте — Bilim. логотипіндегі акцент */}
         <circle cx="22.5" cy="9.5" r="1.6" fill="#F59E0B" />
       </svg>
       {!hideText && (
         <span
-          style={{ color: textColor, fontWeight: 700, fontSize: size * 0.64, letterSpacing: '-0.02em' }}
+          style={{
+            color: textColor ?? 'var(--b-text)',
+            fontWeight: 700,
+            fontSize: size * 0.64,
+            letterSpacing: '-0.02em',
+          }}
         >
           Bilim
         </span>

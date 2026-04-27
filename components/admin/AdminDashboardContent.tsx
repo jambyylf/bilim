@@ -28,14 +28,23 @@ export default function AdminDashboardContent({ stats, pendingCourses, recentOrd
   }
 
   return (
-    <div style={{ padding: '40px 48px' }}>
+    <div className="admin-dash">
+      <style>{`
+        .admin-dash { padding: 24px 16px; }
+        @media (min-width: 768px) { .admin-dash { padding: 40px 48px; } }
+        .admin-kpi { grid-template-columns: repeat(2, 1fr); }
+        @media (min-width: 640px) { .admin-kpi { grid-template-columns: repeat(4, 1fr); } }
+        .admin-main-grid { grid-template-columns: 1fr; }
+        @media (min-width: 768px) { .admin-main-grid { grid-template-columns: 1fr 1fr; } }
+      `}</style>
+
       <div className="mb-8">
         <div className="b-eyebrow mb-1">Admin</div>
         <h1 className="b-h1">{lang === 'kk' ? 'Шолу' : lang === 'en' ? 'Overview' : 'Обзор'}</h1>
       </div>
 
       {/* KPI */}
-      <div className="grid gap-5 mb-8" style={{ gridTemplateColumns: 'repeat(4,1fr)' }}>
+      <div className="admin-kpi grid gap-4 mb-8">
         {KPI.map(({ icon, label, value, color, bg }) => (
           <div key={label} className="card p-5">
             <div className="flex items-center justify-between mb-3">
@@ -49,7 +58,7 @@ export default function AdminDashboardContent({ stats, pendingCourses, recentOrd
         ))}
       </div>
 
-      <div className="grid gap-6" style={{ gridTemplateColumns: '1fr 1fr' }}>
+      <div className="admin-main-grid grid gap-6">
         {/* Тексеруді күтетін курстар */}
         <div className="card overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--b-line)' }}>
@@ -88,13 +97,13 @@ export default function AdminDashboardContent({ stats, pendingCourses, recentOrd
             const s = STATUS_MAP[o.payment_status] ?? STATUS_MAP.pending
             return (
               <div key={o.id} className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid var(--b-line-soft)' }}>
-                <div>
-                  <div className="b-sm font-medium">{o.student?.full_name ?? '—'}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="b-sm font-medium truncate">{o.student?.full_name ?? '—'}</div>
                   <div className="b-xs mt-0.5" style={{ color: 'var(--b-text-3)' }}>
                     {new Date(o.created_at).toLocaleDateString('ru-RU')}
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 shrink-0 ml-3">
                   <span className="b-sm font-semibold">{(o.total_amount ?? 0).toLocaleString('ru-RU')} ₸</span>
                   <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ color: s.color, background: s.bg }}>{s.label}</span>
                 </div>

@@ -67,7 +67,6 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set([sections[0]?.id]))
   const [activeTab, setActiveTab] = useState<'program' | 'instructor' | 'reviews'>('program')
 
-  // Пікір жазу стейті
   const [reviewRating, setReviewRating]   = useState(0)
   const [reviewHover, setReviewHover]     = useState(0)
   const [reviewComment, setReviewComment] = useState('')
@@ -87,13 +86,8 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
       body: JSON.stringify({ courseId: course.id, rating: reviewRating, comment: reviewComment }),
     })
     setReviewSending(false)
-    if (res.ok) {
-      setReviewSent(true)
-      router.refresh()
-    } else {
-      const d = await res.json()
-      setReviewError(d.error ?? 'Error')
-    }
+    if (res.ok) { setReviewSent(true); router.refresh() }
+    else { const d = await res.json(); setReviewError(d.error ?? 'Error') }
   }
 
   function tr(kk: string, ru: string | null, en: string | null) {
@@ -125,13 +119,96 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
     })
   }
 
+  // Сатып алу карточкасы — desktop/mobile ортақ контент
+  const purchaseCard = (
+    <div className="card p-5 md:p-6">
+      {course.trailer_mux_playback_id && (
+        <div className="rounded-xl overflow-hidden mb-4 relative" style={{ aspectRatio: '16/9', background: '#000' }}>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)' }}>
+              <Icon name="play" size={24} style={{ color: '#fff', marginLeft: 3 }} />
+            </div>
+          </div>
+          <div className={`thumb-grad-${grad} thumb-pattern w-full h-full`} />
+        </div>
+      )}
+
+      <div className="mb-4">
+        {course.price === 0 ? (
+          <div className="b-display" style={{ color: 'var(--b-teal)' }}>{t.common.free}</div>
+        ) : (
+          <div className="flex items-baseline gap-2">
+            <div className="b-display">{(course.discount_price ?? course.price).toLocaleString('ru-RU')} {t.common.currency}</div>
+            {course.discount_price && (
+              <div className="b-h4 line-through" style={{ color: 'var(--b-text-4)' }}>
+                {course.price.toLocaleString('ru-RU')} {t.common.currency}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {enrolled ? (
+        <Link
+          href={`/courses/${course.slug}/learn`}
+          className="btn btn-primary btn-fluid w-full mb-3 flex items-center"
+          style={{ justifyContent: 'center', minHeight: 48 }}
+        >
+          <Icon name="play" size={16} />
+          {lang === 'kk' ? 'Жалғастыру' : lang === 'en' ? 'Continue learning' : 'Продолжить'}
+        </Link>
+      ) : (
+        <button
+          className="btn btn-primary btn-fluid w-full mb-3"
+          onClick={handleEnroll}
+          disabled={enrolling}
+          style={{ minHeight: 48 }}
+        >
+          {enrolling ? t.common.loading : t.course.enroll}
+        </button>
+      )}
+
+      <button className="btn btn-secondary w-full mb-4" style={{ justifyContent: 'center', minHeight: 44 }}>
+        <Icon name="heart" size={15} /> {t.course.addToWishlist}
+      </button>
+
+      <div className="flex flex-col gap-2 pt-4" style={{ borderTop: '1px solid var(--b-line)' }}>
+        {[
+          [t.instructor.courseLanguage, t.instructor.languages[course.language as 'kk' | 'ru' | 'en']],
+          [t.instructor.courseLevel, t.instructor.levels[course.level as 'beginner' | 'intermediate' | 'advanced']],
+          [t.course.lessons, `${totalLessons}`],
+        ].map(([label, val]) => (
+          <div key={label} className="flex justify-between b-sm">
+            <span style={{ color: 'var(--b-text-3)' }}>{label}</span>
+            <span className="font-medium">{val}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+
   return (
     <div style={{ background: 'var(--b-bg)', minHeight: '100vh' }}>
       <TopNav />
 
+      <style>{`
+        .detail-hero-grid { grid-template-columns: 1fr; }
+        @media (min-width: 900px) { .detail-hero-grid { grid-template-columns: 1fr 380px; } }
+        .hero-purchase-desktop { display: none; }
+        @media (min-width: 900px) { .hero-purchase-desktop { display: block; } }
+        .detail-content-wrap { padding-bottom: 90px; }
+        @media (min-width: 900px) { .detail-content-wrap { padding-bottom: 0; } }
+        .mobile-cta-bar { display: flex; }
+        @media (min-width: 900px) { .mobile-cta-bar { display: none; } }
+        .learn-grid { grid-template-columns: 1fr; }
+        @media (min-width: 560px) { .learn-grid { grid-template-columns: 1fr 1fr; } }
+        .detail-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .detail-tabs .liquid-tabs { min-width: max-content; }
+      `}</style>
+
       {/* ── HERO ── */}
-      <section className={`thumb-grad-${grad} thumb-pattern`} style={{ padding: '56px 32px' }}>
-        <div className="max-w-[1280px] mx-auto grid gap-12 items-start" style={{ gridTemplateColumns: '1fr 380px' }}>
+      <section className={`thumb-grad-${grad} thumb-pattern`} style={{ padding: '40px 20px' }}>
+        <div className="max-w-[1280px] mx-auto detail-hero-grid grid gap-8 items-start">
           <div className="text-white">
             {course.category && (
               <Link href={`/courses?category=${course.category.slug}`}
@@ -140,13 +217,13 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
                 {tr(course.category.name_kk, course.category.name_ru, course.category.name_en)}
               </Link>
             )}
-            <h1 className="b-display mb-4" style={{ color: '#fff', maxWidth: 640 }}>{title}</h1>
+            <h1 className="b-display mb-4" style={{ color: '#fff', fontSize: 'clamp(22px, 4vw, 40px)' }}>{title}</h1>
             {description && (
               <p className="b-body mb-6" style={{ color: 'rgba(255,255,255,0.82)', maxWidth: 560 }}>
                 {description.slice(0, 220)}{description.length > 220 ? '…' : ''}
               </p>
             )}
-            <div className="flex items-center gap-6 flex-wrap">
+            <div className="flex items-center gap-4 flex-wrap mb-4">
               <div className="flex items-center gap-2">
                 <Stars value={course.rating} size={15} />
                 <span className="b-sm font-semibold" style={{ color: '#fff' }}>{course.rating.toFixed(1)}</span>
@@ -168,7 +245,7 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
               </span>
             </div>
             {course.instructor && (
-              <div className="flex items-center gap-2 mt-5">
+              <div className="flex items-center gap-2">
                 <div className="b-avatar" style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.2)', color: '#fff', fontSize: 13 }}>
                   {course.instructor.full_name?.[0] ?? '?'}
                 </div>
@@ -177,68 +254,10 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
             )}
           </div>
 
-          {/* Сатып алу карточкасы */}
-          <div className="card p-6 sticky top-24" style={{ background: 'var(--b-bg)' }}>
-            {course.trailer_mux_playback_id && (
-              <div className="rounded-xl overflow-hidden mb-4 relative" style={{ aspectRatio: '16/9', background: '#000' }}>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)' }}>
-                    <Icon name="play" size={24} style={{ color: '#fff', marginLeft: 3 }} />
-                  </div>
-                </div>
-                <div className={`thumb-grad-${grad} thumb-pattern w-full h-full`} />
-              </div>
-            )}
-
-            <div className="mb-4">
-              {course.price === 0 ? (
-                <div className="b-display" style={{ color: 'var(--b-teal)' }}>{t.common.free}</div>
-              ) : (
-                <div className="flex items-baseline gap-2">
-                  <div className="b-display">{(course.discount_price ?? course.price).toLocaleString('ru-RU')} {t.common.currency}</div>
-                  {course.discount_price && (
-                    <div className="b-h4 line-through" style={{ color: 'var(--b-text-4)' }}>
-                      {course.price.toLocaleString('ru-RU')} {t.common.currency}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {enrolled ? (
-              <Link
-                href={`/courses/${course.slug}/learn`}
-                className="btn btn-primary btn-fluid btn-lg w-full mb-3"
-                style={{ justifyContent: 'center' }}
-              >
-                <Icon name="play" size={16} />
-                {lang === 'kk' ? 'Жалғастыру' : lang === 'en' ? 'Continue learning' : 'Продолжить'}
-              </Link>
-            ) : (
-              <button
-                className="btn btn-primary btn-fluid btn-lg w-full mb-3"
-                onClick={handleEnroll}
-                disabled={enrolling}
-              >
-                {enrolling ? t.common.loading : t.course.enroll}
-              </button>
-            )}
-
-            <button className="btn btn-secondary w-full mb-4" style={{ justifyContent: 'center' }}>
-              <Icon name="heart" size={15} /> {t.course.addToWishlist}
-            </button>
-
-            <div className="flex flex-col gap-2 pt-4" style={{ borderTop: '1px solid var(--b-line)' }}>
-              {[
-                [t.instructor.courseLanguage, t.instructor.languages[course.language as 'kk' | 'ru' | 'en']],
-                [t.instructor.courseLevel, t.instructor.levels[course.level as 'beginner' | 'intermediate' | 'advanced']],
-                [t.course.lessons, `${totalLessons}`],
-              ].map(([label, val]) => (
-                <div key={label} className="flex justify-between b-sm">
-                  <span style={{ color: 'var(--b-text-3)' }}>{label}</span>
-                  <span className="font-medium">{val}</span>
-                </div>
-              ))}
+          {/* Desktop: sticky purchase card */}
+          <div className="hero-purchase-desktop">
+            <div style={{ position: 'sticky', top: 80 }}>
+              {purchaseCard}
             </div>
           </div>
         </div>
@@ -246,7 +265,7 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
 
       {/* ── TABS ── */}
       <div className="sticky top-16 z-30" style={{ background: 'var(--b-bg)', borderBottom: '1px solid var(--b-line)' }}>
-        <div className="max-w-[1280px] mx-auto px-8">
+        <div className="max-w-[1280px] mx-auto px-4 md:px-8 detail-tabs">
           <div className="liquid-tabs">
             {(['program', 'instructor', 'reviews'] as const).map(tab => (
               <button key={tab} className={`liquid-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
@@ -259,17 +278,18 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
         </div>
       </div>
 
-      <div className="max-w-[1280px] mx-auto px-8 py-10" style={{ maxWidth: 860 }}>
+      {/* ── Мазмұн ── */}
+      <div className="detail-content-wrap max-w-[860px] mx-auto px-4 md:px-8 py-8">
 
         {/* ── ОҚУ ЖОСПАРЫ ── */}
         {activeTab === 'program' && (
           <div>
             {course.what_you_learn && course.what_you_learn.length > 0 && (
-              <div className="card p-6 mb-8">
+              <div className="card p-5 md:p-6 mb-8">
                 <h2 className="b-h2 mb-4">
                   {lang === 'kk' ? 'Не үйренесіз' : lang === 'en' ? "What you'll learn" : 'Чему вы научитесь'}
                 </h2>
-                <div className="grid gap-2" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                <div className="learn-grid grid gap-2">
                   {course.what_you_learn.map((item, i) => (
                     <div key={i} className="flex items-start gap-2 b-sm">
                       <Icon name="check" size={14} style={{ color: 'var(--b-teal)', flexShrink: 0, marginTop: 2 }} />
@@ -284,6 +304,7 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
               <h2 className="b-h2">{t.course.program}</h2>
               <button
                 className="btn btn-link b-sm"
+                style={{ minHeight: 44 }}
                 onClick={() => setExpandedSections(
                   expandedSections.size === sections.length
                     ? new Set()
@@ -301,14 +322,15 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
                 return (
                   <div key={sec.id} className="card overflow-hidden">
                     <button
-                      className="w-full flex items-center justify-between px-5 py-4 text-left"
+                      className="w-full flex items-center justify-between px-4 py-4 text-left"
+                      style={{ minHeight: 52 }}
                       onClick={() => toggleSection(sec.id)}
                     >
                       <div className="flex items-center gap-3">
                         <Icon name={open ? 'chevronDown' : 'chevronLeft'} size={16} style={{ color: 'var(--b-text-3)' }} />
                         <span className="b-h4">{tr(sec.title_kk, sec.title_ru, sec.title_en)}</span>
                       </div>
-                      <span className="b-xs" style={{ color: 'var(--b-text-3)' }}>
+                      <span className="b-xs shrink-0 ml-2" style={{ color: 'var(--b-text-3)' }}>
                         {sec.lessons.length} {t.course.lessons} · {fmtDur(secDur)}
                       </span>
                     </button>
@@ -320,8 +342,8 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
                           .map(lesson => (
                             <div
                               key={lesson.id}
-                              className="flex items-center gap-3 px-5 py-3"
-                              style={{ borderBottom: '1px solid var(--b-line-soft)' }}
+                              className="flex items-center gap-3 px-4 py-3"
+                              style={{ borderBottom: '1px solid var(--b-line-soft)', minHeight: 48 }}
                             >
                               {lesson.is_preview
                                 ? <Icon name="playCircle" size={17} style={{ color: 'var(--b-primary)', flexShrink: 0 }} />
@@ -329,12 +351,12 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
                               }
                               <span className="b-sm flex-1">{tr(lesson.title_kk, lesson.title_ru, lesson.title_en)}</span>
                               {lesson.is_preview && (
-                                <span className="text-xs font-semibold px-2 py-0.5 rounded" style={{ background: 'var(--b-primary-50)', color: 'var(--b-primary)' }}>
+                                <span className="text-xs font-semibold px-2 py-0.5 rounded shrink-0" style={{ background: 'var(--b-primary-50)', color: 'var(--b-primary)' }}>
                                   {t.instructor.freePreview}
                                 </span>
                               )}
                               {lesson.duration_sec > 0 && (
-                                <span className="b-xs" style={{ color: 'var(--b-text-4)' }}>{fmtDur(lesson.duration_sec)}</span>
+                                <span className="b-xs shrink-0" style={{ color: 'var(--b-text-4)' }}>{fmtDur(lesson.duration_sec)}</span>
                               )}
                             </div>
                           ))}
@@ -349,7 +371,7 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
 
         {/* ── СПИКЕР ── */}
         {activeTab === 'instructor' && course.instructor && (
-          <div className="card p-8">
+          <div className="card p-6 md:p-8">
             <div className="flex items-center gap-4 mb-5">
               <div className="b-avatar" style={{ width: 64, height: 64, fontSize: 24, background: 'var(--b-primary)', color: '#fff' }}>
                 {course.instructor.full_name?.[0] ?? '?'}
@@ -372,19 +394,17 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
           <div>
             <div className="flex items-center gap-4 mb-6">
               <div className="text-center">
-                <div style={{ fontSize: 56, fontWeight: 800, lineHeight: 1 }}>{course.rating.toFixed(1)}</div>
+                <div style={{ fontSize: 48, fontWeight: 800, lineHeight: 1 }}>{course.rating.toFixed(1)}</div>
                 <Stars value={course.rating} size={18} />
               </div>
             </div>
 
-            {/* Пікір жазу формасы — тек жазылған студенттер */}
             {enrolled && !alreadyReviewed && !reviewSent && (
-              <div className="card p-6 mb-6">
+              <div className="card p-5 md:p-6 mb-6">
                 <div className="b-h4 mb-4">
                   {lang === 'kk' ? 'Пікір жазу' : lang === 'en' ? 'Write a review' : 'Написать отзыв'}
                 </div>
                 <form onSubmit={submitReview} className="flex flex-col gap-4">
-                  {/* Жұлдыз рейтинг */}
                   <div>
                     <div className="b-sm mb-2" style={{ color: 'var(--b-text-3)' }}>
                       {lang === 'kk' ? 'Рейтинг' : lang === 'en' ? 'Rating' : 'Рейтинг'}
@@ -397,7 +417,7 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
                           onMouseEnter={() => setReviewHover(s)}
                           onMouseLeave={() => setReviewHover(0)}
                           onClick={() => setReviewRating(s)}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2 }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, minWidth: 44, minHeight: 44 }}
                         >
                           <svg width="28" height="28" viewBox="0 0 24 24" fill={(reviewHover || reviewRating) >= s ? '#F59E0B' : 'none'} stroke="#F59E0B" strokeWidth="1.5">
                             <path d="M12 2 14.6 8.6 22 9.5l-5.5 4.8L18 22l-6-3.4L6 22l1.5-7.7L2 9.5l7.4-.9z"/>
@@ -411,18 +431,18 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
                       {lang === 'kk' ? 'Пікір (міндетті емес)' : lang === 'en' ? 'Comment (optional)' : 'Комментарий (необязательно)'}
                     </label>
                     <textarea
-                      className="input w-full"
+                      className="inp w-full"
                       rows={3}
                       value={reviewComment}
                       onChange={e => setReviewComment(e.target.value)}
-                      placeholder={lang === 'kk' ? 'Курс туралы пікіріңіз...' : lang === 'en' ? 'Your thoughts on the course...' : 'Ваши впечатления о курсе...'}
+                      placeholder={lang === 'kk' ? 'Курс туралы пікіріңіз...' : lang === 'en' ? 'Your thoughts...' : 'Ваши впечатления...'}
                       style={{ resize: 'vertical' }}
                     />
                   </div>
                   {reviewError && (
                     <div className="b-sm p-3 rounded-lg" style={{ background: '#fee2e2', color: '#dc2626' }}>{reviewError}</div>
                   )}
-                  <button type="submit" disabled={reviewSending || !reviewRating} className="btn btn-primary" style={{ alignSelf: 'flex-start' }}>
+                  <button type="submit" disabled={reviewSending || !reviewRating} className="btn btn-primary" style={{ alignSelf: 'flex-start', minHeight: 44 }}>
                     {reviewSending
                       ? (lang === 'kk' ? 'Жіберілуде...' : lang === 'en' ? 'Sending...' : 'Отправка...')
                       : (lang === 'kk' ? 'Пікір жіберу' : lang === 'en' ? 'Submit review' : 'Отправить отзыв')}
@@ -435,7 +455,7 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
               <div className="card p-5 mb-6 flex items-center gap-3" style={{ borderColor: '#d1fae5', background: '#f0fdf4' }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5"><path d="m4 12 5 5L20 6"/></svg>
                 <span className="b-sm font-medium" style={{ color: '#059669' }}>
-                  {lang === 'kk' ? 'Пікіріңіз жіберілді!' : lang === 'en' ? 'Your review was submitted!' : 'Ваш отзыв отправлен!'}
+                  {lang === 'kk' ? 'Пікіріңіз жіберілді!' : lang === 'en' ? 'Review submitted!' : 'Отзыв отправлен!'}
                 </span>
               </div>
             )}
@@ -469,6 +489,54 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
               </div>
             )}
           </div>
+        )}
+      </div>
+
+      {/* ── Мобильді жабысқақ CTA ── */}
+      <div
+        className="mobile-cta-bar"
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: '12px 16px',
+          paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
+          background: 'var(--b-bg)',
+          borderTop: '1px solid var(--b-line)',
+          alignItems: 'center',
+          gap: 14,
+          zIndex: 30,
+        }}
+      >
+        <div>
+          <div className="b-xs" style={{ color: 'var(--b-text-3)' }}>
+            {lang === 'kk' ? 'тек' : lang === 'en' ? 'from' : 'от'}
+          </div>
+          <div style={{ fontSize: 20, fontWeight: 700, lineHeight: 1.1 }}>
+            {course.price === 0
+              ? t.common.free
+              : `${(course.discount_price ?? course.price).toLocaleString('ru-RU')} ${t.common.currency}`}
+          </div>
+        </div>
+        {enrolled ? (
+          <Link
+            href={`/courses/${course.slug}/learn`}
+            className="btn btn-primary btn-lg"
+            style={{ flex: 1, justifyContent: 'center', display: 'flex', minHeight: 48 }}
+          >
+            <Icon name="play" size={16} />
+            {lang === 'kk' ? 'Жалғастыру' : lang === 'en' ? 'Continue' : 'Продолжить'}
+          </Link>
+        ) : (
+          <button
+            className="btn btn-primary btn-lg"
+            onClick={handleEnroll}
+            disabled={enrolling}
+            style={{ flex: 1, minHeight: 48 }}
+          >
+            {enrolling ? t.common.loading : t.course.enroll}
+          </button>
         )}
       </div>
     </div>

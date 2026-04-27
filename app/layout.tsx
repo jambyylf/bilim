@@ -1,15 +1,24 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { LangProvider } from '@/components/providers/LangProvider'
 
-// Inter қарпі — Bilim дизайн жүйесінің негізгі қарпі
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
   variable: '--font-inter',
   display: 'swap',
 })
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#1E3A8A' },
+    { media: '(prefers-color-scheme: dark)',  color: '#1E3A8A' },
+  ],
+}
 
 export const metadata: Metadata = {
   title: {
@@ -22,6 +31,15 @@ export const metadata: Metadata = {
   authors: [{ name: 'Bilim Platform' }],
   creator: 'Bilim Platform',
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'),
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Bilim',
+  },
+  formatDetection: {
+    telephone: false,
+  },
   openGraph: {
     type: 'website',
     locale: 'kk_KZ',
@@ -33,11 +51,27 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true },
   },
+  icons: {
+    icon: [
+      { url: '/icons/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/icons/icon.svg',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={inter.variable} suppressHydrationWarning>
+    <html lang="kk" className={inter.variable} suppressHydrationWarning>
+      <head>
+        {/* PWA — iOS Safari */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Bilim" />
+        <link rel="apple-touch-icon" href="/icons/icon.svg" />
+        {/* MS Tiles */}
+        <meta name="msapplication-TileColor" content="#1E3A8A" />
+        <meta name="msapplication-tap-highlight" content="no" />
+      </head>
       <body className="antialiased" style={{ fontFamily: 'var(--font-inter, Inter, sans-serif)' }}>
         <ThemeProvider>
           <LangProvider>
