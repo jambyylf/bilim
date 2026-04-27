@@ -8,7 +8,7 @@ const mux = new Mux({
 })
 
 // Mux direct upload URL жасайды
-export async function POST(req: Request) {
+export async function POST(_req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 

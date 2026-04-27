@@ -49,7 +49,7 @@ export default function InstructorAnalyticsContent({ courseStats, totalStudents,
           { label: lang === 'kk' ? 'Курстар' : lang === 'en' ? 'Courses' : 'Курсы', value: courseStats.length, color: '#8B5CF6', bg: '#f5f3ff' },
           { label: lang === 'kk' ? 'Аяқтаған' : lang === 'en' ? 'Completed' : 'Завершили', value: totalCompleted, color: '#059669', bg: '#d1fae5' },
           { label: lang === 'kk' ? 'Орт. аяқтау %' : lang === 'en' ? 'Avg completion' : 'Ср. завершение', value: `${avgCompletion}%`, color: '#F59E0B', bg: '#fef3c7' },
-        ].map(({ label, value, color, bg }) => (
+        ].map(({ label, value, color }) => (
           <div key={label} className="card p-5">
             <div className="b-xs mb-1" style={{ color: 'var(--b-text-3)' }}>{label}</div>
             <div className="b-h2" style={{ color }}>{value}</div>

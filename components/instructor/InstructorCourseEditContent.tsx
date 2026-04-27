@@ -57,7 +57,7 @@ interface Props {
 
 const TABS = ['basic', 'curriculum'] as const
 
-export default function InstructorCourseEditContent({ course, categories, sections, lessons }: Props) {
+export default function InstructorCourseEditContent({ course, sections, lessons }: Props) {
   const { lang } = useLang()
   const router   = useRouter()
 

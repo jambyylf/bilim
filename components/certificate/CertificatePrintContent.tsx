@@ -16,10 +16,6 @@ export default function CertificatePrintContent({ cert }: { cert: CertData }) {
     setTimeout(() => window.print(), 500)
   }, [])
 
-  const verifyUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/verify/${cert.cert_number}`
-    : `https://bilim.kz/verify/${cert.cert_number}`
-
   return (
     <>
       <style>{`

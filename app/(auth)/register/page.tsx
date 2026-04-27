@@ -2,13 +2,11 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/shared/Logo'
 import { useLang } from '@/components/providers/LangProvider'
 
 export default function RegisterPage() {
-  const router = useRouter()
   const { t } = useLang()
 
   const [fullName, setFullName] = useState('')

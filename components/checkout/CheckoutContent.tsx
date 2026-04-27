@@ -25,10 +25,6 @@ interface Props {
 
 type PayMethod = 'stripe' | 'kaspi'
 
-const GRAD_MAP: Record<string, number> = {
-  design: 1, programming: 8, marketing: 4, business: 7,
-  finance: 3, languages: 5, data: 2,
-}
 
 export default function CheckoutContent({ course, userId, userEmail, profile }: Props) {
   const { lang, t } = useLang()
@@ -40,7 +36,6 @@ export default function CheckoutContent({ course, userId, userEmail, profile }: 
 
   const price = course.discount_price ?? course.price
   const commission = Math.round(price * 0.2)
-  const instructorEarns = price - commission
 
   function tr(kk: string, ru: string, en: string) {
     if (lang === 'ru') return ru || kk

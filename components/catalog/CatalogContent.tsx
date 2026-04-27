@@ -52,7 +52,7 @@ const GRAD_MAP: Record<string, number> = {
   finance: 3, languages: 5, data: 2, 'soft-skills': 6,
 }
 
-export default function CatalogContent({ courses, categories, total, page, pageSize, filters, userId }: Props) {
+export default function CatalogContent({ courses, categories, total, page, pageSize, filters }: Props) {
   const { lang, t } = useLang()
   const router = useRouter()
   const pathname = usePathname()
