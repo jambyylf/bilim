@@ -63,18 +63,20 @@ export default function TopNav({ user }: TopNavProps) {
           <Logo size={28} />
         </Link>
 
-        {/* Liquid tabs — планшет/десктоп */}
-        <nav className="liquid-tabs ml-1 hidden md:inline-flex">
-          {navItems.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className={`liquid-tab no-underline ${pathname === href ? 'active' : ''}`}
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
+        {/* Liquid tabs — тек планшет/десктоп */}
+        <div className="hidden md:block ml-1">
+          <nav className="liquid-tabs">
+            {navItems.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className={`liquid-tab no-underline ${pathname === href ? 'active' : ''}`}
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+        </div>
 
         {/* Іздеу — десктоп */}
         <form onSubmit={handleSearch} className="flex-1 max-w-[360px] relative ml-auto hidden md:block">
