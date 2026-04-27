@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import Logo from '@/components/shared/Logo'
 import Icon from '@/components/shared/Icon'
+import NotificationBell from '@/components/layout/NotificationBell'
 import { useTheme } from '@/components/providers/ThemeProvider'
 import { useLang, type LangCode } from '@/components/providers/LangProvider'
 
@@ -123,9 +124,12 @@ export default function TopNav({ user }: TopNavProps) {
           <div className="w-px h-5 mx-1" style={{ background: 'var(--b-line)' }} />
 
           {user ? (
-            <Link href="/dashboard" className="btn btn-secondary btn-sm">
-              {user.full_name?.split(' ')[0] ?? t.nav.profile}
-            </Link>
+            <>
+              <NotificationBell />
+              <Link href="/dashboard" className="btn btn-secondary btn-sm">
+                {user.full_name?.split(' ')[0] ?? t.nav.profile}
+              </Link>
+            </>
           ) : (
             <>
               <Link href="/login"    className="btn btn-secondary btn-sm">{t.nav.login}</Link>
@@ -163,11 +167,14 @@ export default function TopNav({ user }: TopNavProps) {
             )}
           </div>
           {user ? (
-            <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', padding: 4 }}>
-              <div className="b-avatar" style={{ width: 36, height: 36, background: 'var(--b-primary)', color: '#fff', fontSize: 15 }}>
-                {user.full_name?.[0] ?? '?'}
-              </div>
-            </Link>
+            <>
+              <NotificationBell />
+              <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', padding: 4 }}>
+                <div className="b-avatar" style={{ width: 36, height: 36, background: 'var(--b-primary)', color: '#fff', fontSize: 15 }}>
+                  {user.full_name?.[0] ?? '?'}
+                </div>
+              </Link>
+            </>
           ) : (
             <div className="flex items-center gap-1">
               <Link href="/login"    className="btn btn-secondary btn-sm">{t.nav.login}</Link>

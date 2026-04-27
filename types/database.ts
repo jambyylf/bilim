@@ -357,6 +357,35 @@ export type Database = {
         Update: never
         Relationships: []
       }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          type: string
+          title_kk: string
+          title_ru: string
+          body_kk: string | null
+          body_ru: string | null
+          link: string | null
+          read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: string
+          title_kk: string
+          title_ru: string
+          body_kk?: string | null
+          body_ru?: string | null
+          link?: string | null
+          read?: boolean
+        }
+        Update: {
+          read?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

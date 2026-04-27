@@ -32,9 +32,25 @@ export default async function CoursesPage({
     .order('students_count', { ascending: false })
     .range(from, to)
 
-  if (level)    query = query.eq('level', level as any) as typeof query
-  if (lang)     query = query.eq('language', lang as any) as typeof query
-  if (q)        query = query.or(`title_kk.ilike.%${q}%,title_ru.ilike.%${q}%,title_en.ilike.%${q}%`) as typeof query
+  if (level) query = query.eq('level', level as any) as typeof query
+  if (lang)  query = query.eq('language', lang as any) as typeof query
+
+  if (q) {
+    // Сөздерге бөліп, әрқайсысы бойынша іздеу (multi-token AND)
+    const tokens = q.trim().split(/\s+/).filter(t => t.length >= 2)
+    if (tokens.length > 1) {
+      for (const tok of tokens) {
+        query = query.or(
+          `title_kk.ilike.%${tok}%,title_ru.ilike.%${tok}%,title_en.ilike.%${tok}%`
+        ) as typeof query
+      }
+    } else {
+      // Тақырып + сипаттама бойынша іздеу
+      query = query.or(
+        `title_kk.ilike.%${q}%,title_ru.ilike.%${q}%,title_en.ilike.%${q}%,description_kk.ilike.%${q}%,description_ru.ilike.%${q}%`
+      ) as typeof query
+    }
+  }
 
   const { data: rawCourses, count } = await query
   const courses = rawCourses as any[]

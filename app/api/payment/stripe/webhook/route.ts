@@ -33,16 +33,30 @@ export async function POST(req: Request) {
       status:      'active',
     }, { onConflict: 'student_id,course_id' })
 
-    // Студент санын арттыру (atomic UPDATE)
+    // Студент санын арттыру + instructor хабарламасы
     const { data: courseData } = await supabase
       .from('courses')
-      .select('students_count')
+      .select('students_count, instructor_id, title_kk, title_ru')
       .eq('id', courseId)
       .single()
+
     await supabase
       .from('courses')
       .update({ students_count: ((courseData?.students_count as number) ?? 0) + 1 } as any)
       .eq('id', courseId)
+
+    // Instructor-ға жаңа студент хабарламасы
+    if (courseData?.instructor_id) {
+      await supabase.from('notifications').insert({
+        user_id:  courseData.instructor_id,
+        type:     'new_enrollment',
+        title_kk: `Жаңа студент сіздің курсқа жазылды`,
+        title_ru: `Новый студент записался на ваш курс`,
+        body_kk:  `"${courseData.title_kk}" курсына жаңа студент қосылды`,
+        body_ru:  `Новый студент добавился на курс "${courseData.title_ru}"`,
+        link:     '/instructor/analytics',
+      })
+    }
   }
 
   if (event.type === 'payment_intent.payment_failed') {
