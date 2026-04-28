@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLang } from '@/components/providers/LangProvider'
 import Icon from '@/components/shared/Icon'
+import CustomSelect from '@/components/shared/CustomSelect'
 
 interface Course {
   id: string
@@ -202,21 +203,29 @@ export default function InstructorCourseEditContent({ course, sections, lessons 
               <label className="b-label mb-1.5 block">
                 {lang === 'kk' ? 'Деңгей' : lang === 'en' ? 'Level' : 'Уровень'}
               </label>
-              <select className="input w-full" value={form.level} onChange={e => set('level', e.target.value)}>
-                <option value="beginner">{lang === 'kk' ? 'Бастауыш' : lang === 'en' ? 'Beginner' : 'Начинающий'}</option>
-                <option value="intermediate">{lang === 'kk' ? 'Орта' : lang === 'en' ? 'Intermediate' : 'Средний'}</option>
-                <option value="advanced">{lang === 'kk' ? 'Жоғары' : lang === 'en' ? 'Advanced' : 'Продвинутый'}</option>
-              </select>
+              <CustomSelect
+                value={form.level}
+                onChange={v => set('level', v)}
+                options={[
+                  { value: 'beginner',     label: lang === 'kk' ? 'Бастауыш' : lang === 'en' ? 'Beginner' : 'Начинающий' },
+                  { value: 'intermediate', label: lang === 'kk' ? 'Орта' : lang === 'en' ? 'Intermediate' : 'Средний' },
+                  { value: 'advanced',     label: lang === 'kk' ? 'Жоғары' : lang === 'en' ? 'Advanced' : 'Продвинутый' },
+                ]}
+              />
             </div>
             <div>
               <label className="b-label mb-1.5 block">
                 {lang === 'kk' ? 'Тілі' : lang === 'en' ? 'Language' : 'Язык'}
               </label>
-              <select className="input w-full" value={form.language} onChange={e => set('language', e.target.value)}>
-                <option value="kk">{lang === 'kk' ? 'Қазақша' : lang === 'en' ? 'Kazakh' : 'Казахский'}</option>
-                <option value="ru">{lang === 'kk' ? 'Орысша' : lang === 'en' ? 'Russian' : 'Русский'}</option>
-                <option value="en">{lang === 'kk' ? 'Ағылшынша' : lang === 'en' ? 'English' : 'Английский'}</option>
-              </select>
+              <CustomSelect
+                value={form.language}
+                onChange={v => set('language', v)}
+                options={[
+                  { value: 'kk', label: lang === 'kk' ? 'Қазақша' : lang === 'en' ? 'Kazakh' : 'Казахский' },
+                  { value: 'ru', label: lang === 'kk' ? 'Орысша' : lang === 'en' ? 'Russian' : 'Русский' },
+                  { value: 'en', label: lang === 'kk' ? 'Ағылшынша' : lang === 'en' ? 'English' : 'Английский' },
+                ]}
+              />
             </div>
           </div>
         </div>
