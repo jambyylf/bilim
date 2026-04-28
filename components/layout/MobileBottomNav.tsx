@@ -21,15 +21,12 @@ export default function MobileBottomNav() {
 
   return (
     <nav
-      className="md:hidden"
+      className="md:hidden flex flex-row items-center"
       style={{
         position: 'fixed',
         left: 12,
         right: 12,
         bottom: 12,
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
         padding: 8,
         borderRadius: 28,
         background: isDark ? 'rgba(10,14,26,0.85)' : 'rgba(255,255,255,0.72)',
