@@ -47,7 +47,8 @@ export default function InstructorSidebar({ profile }: SidebarProps) {
   }
 
   const initials = profile?.full_name
-    ?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() ?? '?'
+    ? profile.full_name.trim().split(/\s+/).filter(Boolean).map(n => n[0]).slice(0, 2).join('').toUpperCase()
+    : '?'
 
   const sidebarContent = (
     <>

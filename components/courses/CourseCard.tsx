@@ -49,7 +49,7 @@ export default function CourseCard({ course, lang = 'kk' }: CourseCardProps) {
         <div className="b-h4 leading-snug line-clamp-2">{title}</div>
 
         <div className="b-sm" style={{ color: 'var(--b-text-3)' }}>
-          {course.profiles.full_name}
+          {course.profiles?.full_name ?? '—'}
         </div>
 
         <div className="flex items-center gap-2 mt-auto pt-1">
