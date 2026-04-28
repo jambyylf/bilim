@@ -229,16 +229,17 @@ export default function AdminCoursesContent({ courses, statusFilter, reviewId }:
                             <button onClick={() => setReviewCourse(c)} className="btn btn-secondary btn-sm">
                               {lang === 'kk' ? 'Тексеру' : 'Проверить'}
                             </button>
-                            {c.status === 'rejected' && (
-                              <button
-                                onClick={() => updateStatus(c.id, 'deleted')}
-                                disabled={loading !== null}
-                                className="btn btn-sm"
-                                style={{ background: '#7c3aed', color: '#fff', borderColor: '#7c3aed' }}
-                              >
-                                {loading === c.id + 'deleted' ? '...' : (lang === 'kk' ? 'Жою' : 'Удалить')}
-                              </button>
-                            )}
+                            <button
+                              onClick={() => updateStatus(c.id, 'deleted')}
+                              disabled={loading !== null}
+                              className="btn btn-ghost btn-sm"
+                              style={{ color: '#dc2626' }}
+                              title={lang === 'kk' ? 'Жою' : 'Удалить'}
+                            >
+                              {loading === c.id + 'deleted'
+                                ? '...'
+                                : <Icon name="trash" size={14} />}
+                            </button>
                           </>
                         )}
                       </div>
@@ -294,6 +295,12 @@ export default function AdminCoursesContent({ courses, statusFilter, reviewId }:
                 disabled={loading !== null} className="btn flex-1"
                 style={{ justifyContent: 'center', background: '#dc2626', color: '#fff', borderColor: '#dc2626' }}>
                 {loading === reviewCourse.id + 'rejected' ? '...' : (lang === 'kk' ? 'Қабылдамау' : 'Отклонить')}
+              </button>
+              <button onClick={() => updateStatus(reviewCourse.id, 'deleted')}
+                disabled={loading !== null} className="btn btn-sm"
+                style={{ justifyContent: 'center', color: '#7c3aed', borderColor: '#7c3aed' }}
+                title={lang === 'kk' ? 'Себетке жіберу' : 'В корзину'}>
+                <Icon name="trash" size={15} />
               </button>
             </div>
           </div>
