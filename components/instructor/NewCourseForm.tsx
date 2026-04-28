@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Icon from '@/components/shared/Icon'
+import CustomSelect from '@/components/shared/CustomSelect'
 import { useLang } from '@/components/providers/LangProvider'
 
 interface Category {
@@ -243,32 +244,39 @@ export default function NewCourseForm({ categories }: Props) {
             {/* Категория */}
             <div>
               <label className="b-sm font-medium block mb-1.5">{t.instructor.courseCategory}</label>
-              <select className="inp" value={categoryId} onChange={e => setCategoryId(e.target.value)}>
-                <option value="">—</option>
-                {categories.map(c => (
-                  <option key={c.id} value={c.id}>{catName(c)}</option>
-                ))}
-              </select>
+              <CustomSelect
+                value={categoryId}
+                onChange={setCategoryId}
+                options={categories.map(c => ({ value: c.id, label: catName(c) }))}
+              />
             </div>
 
             {/* Тіл */}
             <div>
               <label className="b-sm font-medium block mb-1.5">{t.instructor.courseLanguage}</label>
-              <select className="inp" value={courseLang} onChange={e => setCourseLang(e.target.value as 'kk'|'ru'|'en')}>
-                <option value="kk">{t.instructor.languages.kk}</option>
-                <option value="ru">{t.instructor.languages.ru}</option>
-                <option value="en">{t.instructor.languages.en}</option>
-              </select>
+              <CustomSelect
+                value={courseLang}
+                onChange={v => setCourseLang(v as 'kk'|'ru'|'en')}
+                options={[
+                  { value: 'kk', label: t.instructor.languages.kk },
+                  { value: 'ru', label: t.instructor.languages.ru },
+                  { value: 'en', label: t.instructor.languages.en },
+                ]}
+              />
             </div>
 
             {/* Деңгей */}
             <div>
               <label className="b-sm font-medium block mb-1.5">{t.instructor.courseLevel}</label>
-              <select className="inp" value={level} onChange={e => setLevel(e.target.value as typeof level)}>
-                <option value="beginner">{t.instructor.levels.beginner}</option>
-                <option value="intermediate">{t.instructor.levels.intermediate}</option>
-                <option value="advanced">{t.instructor.levels.advanced}</option>
-              </select>
+              <CustomSelect
+                value={level}
+                onChange={v => setLevel(v as typeof level)}
+                options={[
+                  { value: 'beginner',     label: t.instructor.levels.beginner },
+                  { value: 'intermediate', label: t.instructor.levels.intermediate },
+                  { value: 'advanced',     label: t.instructor.levels.advanced },
+                ]}
+              />
             </div>
           </div>
         </div>
