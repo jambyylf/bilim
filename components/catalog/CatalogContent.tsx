@@ -20,8 +20,8 @@ interface Course {
   language: string
   level: string
   status: string
-  rating: number
-  students_count: number
+  rating: number | null
+  students_count: number | null
   thumbnail_url: string | null
   category: { slug: string; name_kk: string; name_ru: string; name_en: string } | null
   instructor: { full_name: string | null; avatar_url: string | null } | null
@@ -113,7 +113,7 @@ export default function CatalogContent({ courses, categories, total, page, pageS
 
         <div className="flex flex-col md:flex-row gap-6 md:gap-8">
           {/* Сүзгі панелі */}
-          <aside style={{ width: '100%', maxWidth: '100%', flexShrink: 0 }} className="md:w-[220px] md:max-w-[220px]">
+          <aside className="w-full md:w-[220px] md:max-w-[220px] shrink-0">
             {/* Категориялар */}
             <div className="mb-6">
               <div className="b-eyebrow mb-3">{t.home.categories}</div>
@@ -248,9 +248,9 @@ export default function CatalogContent({ courses, categories, total, page, pageS
                             {course.instructor?.full_name ?? '—'}
                           </div>
                           <div className="flex items-center gap-2">
-                            <Stars value={course.rating} size={12} />
+                            <Stars value={course.rating ?? 0} size={12} showNum={false} />
                             <span className="b-xs" style={{ color: 'var(--b-text-4)' }}>
-                              {course.rating.toFixed(1)} · {course.students_count.toLocaleString('ru-RU')} {t.course.students}
+                              {(course.rating ?? 0).toFixed(1)} · {(course.students_count ?? 0).toLocaleString('ru-RU')} {t.course.students}
                             </span>
                           </div>
                           <div className="flex items-center justify-between mt-auto pt-2" style={{ borderTop: '1px solid var(--b-line-soft)' }}>

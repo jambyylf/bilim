@@ -11,7 +11,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (!course || course.instructor_id !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await req.json()
-  const allowed = ['title_kk', 'title_ru', 'title_en', 'description_kk', 'description_ru', 'description_en', 'price', 'level', 'language', 'thumbnail_url']
+  const allowed = ['title_kk', 'title_ru', 'title_en', 'description_kk', 'description_ru', 'description_en', 'price', 'level', 'language', 'thumbnail_url', 'category_id']
   const update: Record<string, unknown> = {}
   for (const key of allowed) {
     if (key in body) update[key] = body[key]

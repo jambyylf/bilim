@@ -52,19 +52,27 @@ export default function CustomSelect({ value, onChange, options, placeholder = '
   const dropdown = open && rect ? createPortal(
     <div
       id="custom-select-portal"
-      style={{
-        position: 'fixed',
-        top: rect.bottom + 6,
-        left: rect.left,
-        width: rect.width,
-        zIndex: 9999,
-        background: 'var(--b-bg)',
-        border: '1px solid var(--b-line)',
-        borderRadius: 12,
-        maxHeight: 260,
-        overflowY: 'auto',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.28)',
-      }}
+      style={(() => {
+        const spaceBelow = window.innerHeight - rect.bottom - 8
+        const spaceAbove = rect.top - 8
+        const openUp = spaceBelow < 180 && spaceAbove > spaceBelow
+        const maxH = Math.min(260, openUp ? spaceAbove : spaceBelow)
+        return {
+          position: 'fixed' as const,
+          ...(openUp
+            ? { bottom: window.innerHeight - rect.top + 6 }
+            : { top: rect.bottom + 6 }),
+          left: rect.left,
+          width: rect.width,
+          zIndex: 9999,
+          background: 'var(--b-bg)',
+          border: '1px solid var(--b-line)',
+          borderRadius: 12,
+          maxHeight: maxH,
+          overflowY: 'auto' as const,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.28)',
+        }
+      })()}
     >
       <button
         type="button"

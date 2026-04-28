@@ -11,7 +11,7 @@ export default async function InstructorCourseEditPage({ params }: { params: { i
 
   const { data: course } = await supabase
     .from('courses')
-    .select('id, title_ru, title_kk, title_en, description_ru, description_kk, description_en, slug, price, level, language, status, thumbnail_url, instructor_id')
+    .select('id, title_ru, title_kk, title_en, description_ru, description_kk, description_en, slug, price, level, language, status, thumbnail_url, instructor_id, category_id')
     .eq('id', params.id)
     .single()
 

@@ -19,41 +19,43 @@ export default async function CoursesPage({
   const from     = (page - 1) * pageSize
   const to       = from + pageSize - 1
 
-  let query = supabase
-    .from('courses')
-    .select(`
-      id, slug, title_kk, title_ru, title_en,
-      price, discount_price, language, level, status,
-      rating, students_count, thumbnail_url,
-      category:categories(slug, name_kk, name_ru, name_en),
-      instructor:profiles!courses_instructor_id_fkey(full_name, avatar_url)
-    `, { count: 'exact' })
-    .eq('status', 'published')
-    .order('students_count', { ascending: false })
-    .range(from, to)
+  // search_courses RPC — SECURITY DEFINER, RLS айналып өтеді
+  const { data: rawCourses } = await supabase.rpc('search_courses', {
+    search_query: q,
+    cat_slug:     category,
+    course_level: level,
+    course_lang:  lang,
+    p_from:       from,
+    p_to:         to,
+  })
 
-  if (level) query = query.eq('level', level as any) as typeof query
-  if (lang)  query = query.eq('language', lang as any) as typeof query
+  const courses = (rawCourses ?? []).map((c: any) => ({
+    id:             c.id,
+    slug:           c.slug,
+    title_kk:       c.title_kk,
+    title_ru:       c.title_ru,
+    title_en:       c.title_en,
+    price:          c.price,
+    discount_price: c.discount_price,
+    language:       c.language,
+    level:          c.level,
+    status:         c.status,
+    rating:         c.rating,
+    students_count: c.students_count,
+    thumbnail_url:  c.thumbnail_url,
+    category: c.category_slug ? {
+      slug:     c.category_slug,
+      name_kk:  c.category_name_kk,
+      name_ru:  c.category_name_ru,
+      name_en:  c.category_name_en,
+    } : null,
+    instructor: {
+      full_name:  c.instructor_name ?? null,
+      avatar_url: null,
+    },
+  }))
 
-  if (q) {
-    // Сөздерге бөліп, әрқайсысы бойынша іздеу (multi-token AND)
-    const tokens = q.trim().split(/\s+/).filter(t => t.length >= 2)
-    if (tokens.length > 1) {
-      for (const tok of tokens) {
-        query = query.or(
-          `title_kk.ilike.%${tok}%,title_ru.ilike.%${tok}%,title_en.ilike.%${tok}%`
-        ) as typeof query
-      }
-    } else {
-      // Тақырып + сипаттама бойынша іздеу
-      query = query.or(
-        `title_kk.ilike.%${q}%,title_ru.ilike.%${q}%,title_en.ilike.%${q}%,description_kk.ilike.%${q}%,description_ru.ilike.%${q}%`
-      ) as typeof query
-    }
-  }
-
-  const { data: rawCourses, count } = await query
-  const courses = rawCourses as any[]
+  const total = (rawCourses as any)?.[0]?.total_count ?? 0
 
   const { data: categories } = await supabase
     .from('categories')
@@ -64,9 +66,9 @@ export default async function CoursesPage({
 
   return (
     <CatalogContent
-      courses={courses ?? []}
+      courses={courses}
       categories={(categories as any) ?? []}
-      total={count ?? 0}
+      total={Number(total)}
       page={page}
       pageSize={pageSize}
       filters={{ category, level, lang, q }}

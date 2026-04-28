@@ -20,6 +20,7 @@ interface Course {
   language: string | null
   status: string
   thumbnail_url: string | null
+  category_id: string | null
 }
 
 interface Category {
@@ -93,7 +94,7 @@ export default function InstructorCourseEditContent({ course, categories, sectio
     price:          String(course.price ?? 0),
     level:          course.level ?? 'beginner',
     language:       course.language ?? 'kk',
-    category_id:    '',
+    category_id:    course.category_id ?? '',
   })
 
   // Бағдарлама күйі
@@ -332,33 +333,53 @@ export default function InstructorCourseEditContent({ course, categories, sectio
             </div>
           </div>
 
-          {categories.length > 0 && (
-            <div>
-              <label className="b-label mb-1.5 block">{lang === 'kk' ? 'Категория' : lang === 'en' ? 'Category' : 'Категория'}</label>
-              <CustomSelect
-                value={form['category_id' as keyof typeof form] ?? ''}
-                onChange={v => setField('category_id', v)}
-                options={categories.map(c => ({ value: c.id, label: catName(c) }))}
-                placeholder="—"
-              />
-            </div>
-          )}
+          <div>
+            <label className="b-label mb-1.5 block">{lang === 'kk' ? 'Категория' : lang === 'en' ? 'Category' : 'Категория'}</label>
+            <CustomSelect
+              value={form.category_id ?? ''}
+              onChange={v => setField('category_id', v)}
+              options={categories.map(c => ({ value: c.id, label: catName(c) }))}
+              placeholder="—"
+            />
+          </div>
         </div>
       )}
 
       {/* ── БАҒДАРЛАМА ── */}
       {tab === 'curriculum' && (
         <div style={{ maxWidth: 720 }}>
-          {/* Admin тексеруі туралы ескерту */}
-          <div className="flex items-center gap-2 p-3 rounded-xl mb-5 b-xs"
-            style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' }}>
-            <Icon name="clock" size={14} />
-            {lang === 'kk'
-              ? 'Бағдарламаны сақтағанда курс тексеруге жіберіледі. Admin бекіткеннен кейін жарияланады.'
-              : lang === 'en'
-              ? 'Saving curriculum will send the course for review. It will be published after admin approval.'
-              : 'При сохранении программы курс будет отправлен на проверку. Будет опубликован после одобрения админа.'}
-          </div>
+          {/* Курс күйіне байланысты баннер */}
+          {course.status === 'published' ? (
+            <div className="flex items-center gap-2 p-3 rounded-xl mb-5 b-xs"
+              style={{ background: '#d1fae5', color: '#065f46', border: '1px solid #a7f3d0' }}>
+              <Icon name="check" size={14} />
+              {lang === 'kk'
+                ? 'Курс жарияланған. Өзгерістер сақталса, қайта тексеруге жіберіледі.'
+                : lang === 'en'
+                ? 'Course is published. Saving changes will send it for re-review.'
+                : 'Курс опубликован. При сохранении изменений он будет отправлен на повторную проверку.'}
+            </div>
+          ) : course.status === 'pending' ? (
+            <div className="flex items-center gap-2 p-3 rounded-xl mb-5 b-xs"
+              style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' }}>
+              <Icon name="clock" size={14} />
+              {lang === 'kk'
+                ? 'Курс тексерілуде. Admin бекіткеннен кейін жарияланады.'
+                : lang === 'en'
+                ? 'Course is under review. It will be published after admin approval.'
+                : 'Курс на проверке. Будет опубликован после одобрения админа.'}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 p-3 rounded-xl mb-5 b-xs"
+              style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' }}>
+              <Icon name="clock" size={14} />
+              {lang === 'kk'
+                ? 'Бағдарламаны сақтағанда курс тексеруге жіберіледі. Admin бекіткеннен кейін жарияланады.'
+                : lang === 'en'
+                ? 'Saving curriculum will send the course for review. It will be published after admin approval.'
+                : 'При сохранении программы курс будет отправлен на проверку. Будет опубликован после одобрения админа.'}
+            </div>
+          )}
 
           {localSections.length === 0 && (
             <div className="card p-8 text-center b-sm mb-4" style={{ color: 'var(--b-text-3)' }}>
