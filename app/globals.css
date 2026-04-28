@@ -171,6 +171,16 @@ body {
 [data-theme="dark"] .input {
   background: rgba(255,255,255,.04); color: var(--b-text); border-color: #1f2937;
 }
+[data-theme="dark"] select.inp,
+[data-theme="dark"] select.input {
+  color-scheme: dark;
+  background-color: #111827;
+}
+[data-theme="dark"] select.inp option,
+[data-theme="dark"] select.input option {
+  background: #111827;
+  color: var(--b-text);
+}
 [data-theme="dark"] .inp::placeholder,
 [data-theme="dark"] .input::placeholder { color: var(--b-text-4); }
 [data-theme="dark"] .inp:focus,
