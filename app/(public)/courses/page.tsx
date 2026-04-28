@@ -20,7 +20,7 @@ export default async function CoursesPage({
   const to       = from + pageSize - 1
 
   // search_courses RPC — SECURITY DEFINER, RLS айналып өтеді
-  const { data: rawCourses } = await supabase.rpc('search_courses', {
+  const { data: rawCourses } = await (supabase as any).rpc('search_courses', {
     search_query: q,
     cat_slug:     category,
     course_level: level,
