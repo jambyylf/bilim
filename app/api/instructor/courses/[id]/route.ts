@@ -22,3 +22,29 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   return NextResponse.json({ ok: true })
 }
+
+export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Тек өз курсын жоя алады
+  const { data: course } = await supabase
+    .from('courses')
+    .select('instructor_id, status')
+    .eq('id', params.id)
+    .single()
+
+  if (!course || course.instructor_id !== user.id)
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  // Жарияланған курсты тікелей жою мүмкін емес — алдымен draft-қа өзгерту керек
+  const { error } = await supabase
+    .from('courses')
+    .update({ status: 'deleted', deleted_at: new Date().toISOString() } as any)
+    .eq('id', params.id)
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  return NextResponse.json({ ok: true })
+}

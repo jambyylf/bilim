@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import Icon from '@/components/shared/Icon'
 import Stars from '@/components/shared/Stars'
 import { useLang } from '@/components/providers/LangProvider'
@@ -21,7 +22,22 @@ interface Course {
 
 export default function InstructorCoursesContent({ courses }: { courses: Course[] }) {
   const { lang, t } = useLang()
+  const router = useRouter()
   const [filter, setFilter] = useState<'all' | 'published' | 'draft' | 'pending' | 'rejected' | 'deleted'>('all')
+  const [deleting, setDeleting] = useState<string | null>(null)
+
+  async function deleteCourse(id: string) {
+    const confirm = window.confirm(
+      lang === 'kk' ? 'Курсты жойғыңыз келе ме? Бұл әрекетті 7 күн ішінде қайтаруға болады.' :
+      lang === 'en' ? 'Delete this course? You can restore it within 7 days.' :
+      'Удалить курс? Это действие можно отменить в течение 7 дней.'
+    )
+    if (!confirm) return
+    setDeleting(id)
+    await fetch(`/api/instructor/courses/${id}`, { method: 'DELETE' })
+    setDeleting(null)
+    router.refresh()
+  }
 
   function title(c: Course) {
     if (lang === 'ru') return c.title_ru ?? c.title_kk ?? '—'
@@ -97,7 +113,7 @@ export default function InstructorCoursesContent({ courses }: { courses: Course[
             <div
               className="courses-table-grid grid px-6 py-3 b-xs font-semibold uppercase"
               style={{
-                gridTemplateColumns: '3fr 1fr 1fr 1fr 80px',
+                gridTemplateColumns: '3fr 1fr 1fr 1fr 100px',
                 color: 'var(--b-text-3)',
                 borderBottom: '1px solid var(--b-line)',
                 letterSpacing: '0.06em',
@@ -117,7 +133,7 @@ export default function InstructorCoursesContent({ courses }: { courses: Course[
                   key={course.id}
                   className="courses-table-grid grid px-6 py-4 items-center"
                   style={{
-                    gridTemplateColumns: '3fr 1fr 1fr 1fr 80px',
+                    gridTemplateColumns: '3fr 1fr 1fr 1fr 100px',
                     borderBottom: i < filtered.length - 1 ? '1px solid var(--b-line-soft)' : 'none',
                   }}
                 >
@@ -167,12 +183,34 @@ export default function InstructorCoursesContent({ courses }: { courses: Course[
 
                   {/* Әрекеттер */}
                   <div className="flex items-center gap-1 justify-end">
-                    <Link href={`/instructor/courses/${course.id}/edit`} className="btn btn-ghost btn-sm" title={t.instructor.edit}>
-                      <Icon name="edit" size={14} />
-                    </Link>
-                    <Link href={`/courses/${course.id}`} className="btn btn-ghost btn-sm" title={t.instructor.viewCourse}>
-                      <Icon name="eye" size={14} />
-                    </Link>
+                    {course.status !== 'deleted' && (
+                      <Link href={`/instructor/courses/${course.id}/edit`} className="btn btn-ghost btn-sm" title={t.instructor.edit}>
+                        <Icon name="edit" size={14} />
+                      </Link>
+                    )}
+                    {course.status === 'published' && (
+                      <Link href={`/courses/${course.id}`} className="btn btn-ghost btn-sm" title={t.instructor.viewCourse}>
+                        <Icon name="eye" size={14} />
+                      </Link>
+                    )}
+                    {course.status !== 'deleted' ? (
+                      <button
+                        onClick={() => deleteCourse(course.id)}
+                        disabled={deleting === course.id}
+                        className="btn btn-ghost btn-sm"
+                        title={lang === 'kk' ? 'Жою' : lang === 'en' ? 'Delete' : 'Удалить'}
+                        style={{ color: '#dc2626' }}
+                      >
+                        {deleting === course.id
+                          ? <Icon name="refresh" size={14} style={{ opacity: 0.5 }} />
+                          : <Icon name="trash" size={14} />
+                        }
+                      </button>
+                    ) : (
+                      <span className="b-xs px-2" style={{ color: '#7c3aed' }}>
+                        {lang === 'kk' ? 'Жойылды' : lang === 'en' ? 'Deleted' : 'Удалён'}
+                      </span>
+                    )}
                   </div>
                 </div>
               )
