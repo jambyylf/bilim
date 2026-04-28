@@ -61,7 +61,8 @@ export default function CustomSelect({ value, onChange, options, placeholder = '
         background: 'var(--b-bg)',
         border: '1px solid var(--b-line)',
         borderRadius: 12,
-        overflow: 'hidden',
+        maxHeight: 260,
+        overflowY: 'auto',
         boxShadow: '0 8px 32px rgba(0,0,0,0.28)',
       }}
     >
