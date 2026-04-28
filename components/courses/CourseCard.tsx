@@ -12,7 +12,7 @@ interface CourseCardProps {
   lang?: 'kk' | 'ru' | 'en'
 }
 
-export default function CourseCard({ course, lang = 'ru' }: CourseCardProps) {
+export default function CourseCard({ course, lang = 'kk' }: CourseCardProps) {
   // Тілге сай атау
   const title = lang === 'kk' ? course.title_kk
     : lang === 'en' ? course.title_en

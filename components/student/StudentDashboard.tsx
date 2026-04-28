@@ -6,6 +6,7 @@ import TopNav from '@/components/layout/TopNav'
 import MobileBottomNav from '@/components/layout/MobileBottomNav'
 import Icon from '@/components/shared/Icon'
 import { useLang } from '@/components/providers/LangProvider'
+import { createClient } from '@/lib/supabase/client'
 
 interface Enrollment {
   id: string
@@ -44,6 +45,12 @@ export default function StudentDashboard({ profile, enrollments }: Props) {
     return kk || ru
   }
 
+  async function handleLogout() {
+    await createClient().auth.signOut()
+    router.push('/')
+    router.refresh()
+  }
+
   const completedCount = enrollments.filter(e => e.progress_pct >= 100).length
   const inProgressCount = enrollments.filter(e => e.progress_pct > 0 && e.progress_pct < 100).length
   const continueEnroll = enrollments.find(e => e.progress_pct > 0 && e.progress_pct < 100)
@@ -52,7 +59,7 @@ export default function StudentDashboard({ profile, enrollments }: Props) {
     <div style={{ background: 'var(--b-bg)', minHeight: '100vh' }}>
       <TopNav user={profile} />
 
-      <div className="max-w-[1280px] mx-auto px-4 md:px-8 py-6 md:py-10 pb-24 md:pb-10">
+      <div className="max-w-[1280px] mx-auto px-4 md:px-8 py-6 md:py-10 pb-28 md:pb-10">
         {/* Сәлем */}
         <div className="flex items-center gap-4 mb-6 md:mb-10">
           <div className="b-avatar" style={{ width: 56, height: 56, fontSize: 22, background: 'var(--b-primary)', color: '#fff' }}>
@@ -68,10 +75,16 @@ export default function StudentDashboard({ profile, enrollments }: Props) {
               {lang === 'kk' ? 'Бүгін не үйренеміз?' : lang === 'en' ? "What's learning today?" : 'Что изучим сегодня?'}
             </p>
           </div>
-          <Link href="/settings" className="btn btn-secondary btn-sm hidden md:flex items-center gap-2">
-            <Icon name="settings" size={14} />
-            {lang === 'kk' ? 'Параметрлер' : lang === 'en' ? 'Settings' : 'Настройки'}
-          </Link>
+          <div className="hidden md:flex items-center gap-2">
+            <Link href="/settings" className="btn btn-secondary btn-sm flex items-center gap-2">
+              <Icon name="settings" size={14} />
+              {lang === 'kk' ? 'Параметрлер' : lang === 'en' ? 'Settings' : 'Настройки'}
+            </Link>
+            <button onClick={handleLogout} className="btn btn-ghost btn-sm flex items-center gap-2" style={{ color: 'var(--b-error)' }}>
+              <Icon name="logout" size={14} />
+              {lang === 'kk' ? 'Шығу' : lang === 'en' ? 'Logout' : 'Выйти'}
+            </button>
+          </div>
         </div>
 
         {/* Мобильді іздеу */}

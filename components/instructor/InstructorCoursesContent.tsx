@@ -21,7 +21,7 @@ interface Course {
 
 export default function InstructorCoursesContent({ courses }: { courses: Course[] }) {
   const { lang, t } = useLang()
-  const [filter, setFilter] = useState<'all' | 'published' | 'draft' | 'pending' | 'rejected'>('all')
+  const [filter, setFilter] = useState<'all' | 'published' | 'draft' | 'pending' | 'rejected' | 'deleted'>('all')
 
   function title(c: Course) {
     if (lang === 'ru') return c.title_ru ?? c.title_kk ?? '—'
@@ -34,6 +34,7 @@ export default function InstructorCoursesContent({ courses }: { courses: Course[
     draft:     { label: t.instructor.draft,     color: '#6b7280', bg: 'var(--b-bg-soft)' },
     pending:   { label: t.instructor.pending,   color: '#d97706', bg: '#fef3c7' },
     rejected:  { label: t.instructor.rejected,  color: '#dc2626', bg: '#fee2e2' },
+    deleted:   { label: lang === 'kk' ? 'Жойылды' : lang === 'en' ? 'Deleted' : 'Удалён', color: '#7c3aed', bg: '#ede9fe' },
   }
 
   const filtered = filter === 'all' ? courses : courses.filter(c => c.status === filter)
@@ -44,6 +45,7 @@ export default function InstructorCoursesContent({ courses }: { courses: Course[
     { key: 'draft',     label: t.instructor.draft },
     { key: 'pending',   label: t.instructor.pending },
     { key: 'rejected',  label: t.instructor.rejected },
+    { key: 'deleted',   label: lang === 'kk' ? 'Жойылды' : lang === 'en' ? 'Deleted' : 'Удалён' },
   ] as const
 
   return (

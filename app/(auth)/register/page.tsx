@@ -56,7 +56,8 @@ export default function RegisterPage() {
   }
 
   async function handleGoogle() {
-    await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${location.origin}/auth/callback` } })
+    // Рөлді callback URL-ге қосамыз
+    await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${location.origin}/auth/callback?role=${role}` } })
   }
 
   // ── Phone: жіберу ──

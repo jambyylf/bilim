@@ -64,6 +64,7 @@ const PATHS: Record<string, React.ReactNode> = {
   document:   <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6 M16 13H8 M16 17H8 M10 9H8"/></>,
   mail:       <><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></>,
   refresh:    <path d="M3 12a9 9 0 0 1 15-6.7L21 8 M21 12a9 9 0 0 1-15 6.7L3 16"/>,
+  logout:     <><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></>,
 }
 
 export default function Icon({ name, size = 16, stroke = 1.75, className, style }: IconProps) {

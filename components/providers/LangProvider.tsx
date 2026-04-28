@@ -17,8 +17,8 @@ interface LangContextType {
 }
 
 const LangContext = createContext<LangContextType>({
-  lang: 'ru',
-  t: ru,
+  lang: 'kk',
+  t: kk,
   setLang: () => {},
 })
 
@@ -27,14 +27,13 @@ export function useLang() {
 }
 
 export function LangProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<LangCode>('ru')
+  const [lang, setLangState] = useState<LangCode>('kk')
 
   useEffect(() => {
     const saved = localStorage.getItem('bilim-lang') as LangCode | null
-    if (saved && ['kk', 'ru', 'en'].includes(saved)) {
-      setLangState(saved)
-      document.documentElement.setAttribute('lang', saved)
-    }
+    const initial = (saved && ['kk', 'ru', 'en'].includes(saved)) ? saved : 'kk'
+    setLangState(initial)
+    document.documentElement.setAttribute('lang', initial)
   }, [])
 
   function setLang(code: LangCode) {

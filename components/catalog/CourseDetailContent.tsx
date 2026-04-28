@@ -105,6 +105,10 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
 
   async function handleEnroll() {
     if (!userId) { router.push('/login?redirect=/courses/' + course.slug); return }
+    if (course.price > 0) {
+      router.push(`/checkout?course=${course.id}`)
+      return
+    }
     setEnrolling(true)
     await supabase.from('enrollments').insert({ student_id: userId, course_id: course.id })
     router.push(`/courses/${course.slug}/learn`)
@@ -164,7 +168,9 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
           disabled={enrolling}
           style={{ minHeight: 48 }}
         >
-          {enrolling ? t.common.loading : t.course.enroll}
+          {enrolling ? t.common.loading : course.price > 0
+            ? (lang === 'kk' ? 'Сатып алу' : lang === 'en' ? 'Buy now' : 'Купить')
+            : t.course.enroll}
         </button>
       )}
 
@@ -535,7 +541,9 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
             disabled={enrolling}
             style={{ flex: 1, minHeight: 48 }}
           >
-            {enrolling ? t.common.loading : t.course.enroll}
+            {enrolling ? t.common.loading : course.price > 0
+              ? (lang === 'kk' ? 'Сатып алу' : lang === 'en' ? 'Buy now' : 'Купить')
+              : t.course.enroll}
           </button>
         )}
       </div>

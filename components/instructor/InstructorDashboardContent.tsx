@@ -170,7 +170,7 @@ export default function InstructorDashboardContent({ courses, reviews, totalStud
           {reviews.length === 0 ? (
             <div className="p-8 text-center" style={{ color: 'var(--b-text-3)' }}>
               <Icon name="star" size={36} style={{ margin: '0 auto 10px', opacity: 0.25 }} />
-              <div className="b-sm">{t.common.loading}</div>
+              <div className="b-sm">{lang === 'kk' ? 'Пікір жоқ' : lang === 'en' ? 'No reviews yet' : 'Отзывов пока нет'}</div>
             </div>
           ) : (
             <div>

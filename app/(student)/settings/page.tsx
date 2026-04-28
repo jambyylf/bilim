@@ -11,9 +11,9 @@ export default async function StudentSettingsPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, full_name, email, bio, avatar_url, role')
+    .select('id, full_name, bio, avatar_url, role')
     .eq('id', user.id)
     .single()
 
-  return <StudentSettingsContent profile={profile as any} />
+  return <StudentSettingsContent profile={{ ...profile, email: user.email ?? null } as any} />
 }

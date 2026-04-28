@@ -29,15 +29,18 @@ export default function TopNav({ user }: TopNavProps) {
   const [langOpen,   setLangOpen]   = useState(false)
   const [searchQ,    setSearchQ]    = useState('')
 
-  const langRef   = useRef<HTMLDivElement>(null)
+  const desktopLangRef = useRef<HTMLDivElement>(null)
+  const mobileLangRef  = useRef<HTMLDivElement>(null)
 
-  // Сыртқа басқанда жабу
+  // Сыртқа басқанда жабу — click (mousedown емес!) пайдаланамыз
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false)
+      const inDesktop = desktopLangRef.current?.contains(e.target as Node)
+      const inMobile  = mobileLangRef.current?.contains(e.target as Node)
+      if (!inDesktop && !inMobile) setLangOpen(false)
     }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
+    document.addEventListener('click', handleClick)
+    return () => document.removeEventListener('click', handleClick)
   }, [])
 
   function handleSearch(e: React.FormEvent) {
@@ -100,7 +103,7 @@ export default function TopNav({ user }: TopNavProps) {
             <Icon name={theme === 'light' ? 'moon' : 'sun'} size={16} />
           </button>
 
-          <div className="relative" ref={langRef}>
+          <div className="relative" ref={desktopLangRef}>
             <button className="btn btn-ghost btn-sm gap-1.5" onClick={() => setLangOpen(v => !v)}>
               <Icon name="globe" size={14} />
               {LANG_LABELS[lang]}
@@ -143,7 +146,7 @@ export default function TopNav({ user }: TopNavProps) {
           <button onClick={toggleTheme} className="btn btn-ghost btn-sm" style={{ padding: 8 }} aria-label="theme">
             <Icon name={theme === 'light' ? 'moon' : 'sun'} size={16} />
           </button>
-          <div className="relative" ref={langRef}>
+          <div className="relative" ref={mobileLangRef}>
             <button
               className="btn btn-ghost btn-sm"
               style={{ padding: '6px 8px', fontSize: 11, fontWeight: 600 }}
