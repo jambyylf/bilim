@@ -310,6 +310,16 @@ textarea.inp, textarea.input { resize: vertical; min-height: 100px; }
 }
 [data-theme="dark"] .toast { background: #f8fafc; color: #0a0e1a; }
 
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--b-line); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--b-text-4); }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); }
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+* { scrollbar-width: thin; scrollbar-color: var(--b-line) transparent; }
+[data-theme="dark"] * { scrollbar-color: rgba(255,255,255,0.12) transparent; }
+
 /* ── Misc ── */
 .divider { height: 1px; background: var(--b-line); }
 .hairline > * + * { border-top: 1px solid var(--b-line); }
