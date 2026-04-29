@@ -328,11 +328,11 @@ export default function LessonPlayer({
       {/* ── Main area ── */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
 
-        {/* LEFT: player column */}
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        {/* LEFT: player column — grid: video fills 1fr, toolbar auto */}
+        <div style={{ flex: 1, display: 'grid', gridTemplateRows: '1fr auto', minHeight: 0, overflow: 'hidden' }}>
 
-          {/* Video */}
-          <div style={{ width: '100%', aspectRatio: '16/9', background: '#000', position: 'relative', flexShrink: 0 }}>
+          {/* Video — fills all available height */}
+          <div style={{ background: '#000', position: 'relative', minHeight: 0, overflow: 'hidden' }}>
             {currentLesson?.has_video ? (
               <YouTubeSecurePlayer
                 lessonId={currentLesson.id}
