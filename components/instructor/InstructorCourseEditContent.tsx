@@ -45,8 +45,6 @@ interface Lesson {
   section_id: string
   order_idx: number
   is_preview: boolean
-  mux_playback_id: string | null
-  mux_upload_id: string | null
   youtube_url: string | null
 }
 
@@ -63,11 +61,7 @@ interface LocalLesson {
   title_ru: string
   order_idx: number
   is_preview: boolean
-  mux_upload_id?: string
-  uploading: boolean
-  hasVideo: boolean
   youtube_url: string
-  showYtInput: boolean
 }
 
 interface LocalSection {
@@ -112,16 +106,12 @@ export default function InstructorCourseEditContent({ course, categories, sectio
         .filter(l => l.section_id === s.id)
         .sort((a, b) => a.order_idx - b.order_idx)
         .map(l => ({
-          id:             l.id,
-          title_kk:       l.title_kk ?? '',
-          title_ru:       l.title_ru ?? '',
-          order_idx:      l.order_idx,
-          is_preview:     l.is_preview,
-          mux_upload_id:  l.mux_upload_id ?? undefined,
-          hasVideo:       !!(l.mux_playback_id || l.mux_upload_id),
-          uploading:      false,
-          youtube_url:    l.youtube_url ?? '',
-          showYtInput:    !!l.youtube_url,
+          id:          l.id,
+          title_kk:    l.title_kk ?? '',
+          title_ru:    l.title_ru ?? '',
+          order_idx:   l.order_idx,
+          is_preview:  l.is_preview,
+          youtube_url: (l as any).youtube_url ?? '',
         })),
     }))
   )
@@ -181,7 +171,7 @@ export default function InstructorCourseEditContent({ course, categories, sectio
   // ── Сабақ CRUD ──
   function addLesson(sIdx: number) {
     setLocalSections(s => s.map((sec, i) => i === sIdx
-      ? { ...sec, lessons: [...sec.lessons, { title_kk: '', title_ru: '', order_idx: sec.lessons.length, is_preview: false, uploading: false, hasVideo: false, youtube_url: '', showYtInput: false }] }
+      ? { ...sec, lessons: [...sec.lessons, { title_kk: '', title_ru: '', order_idx: sec.lessons.length, is_preview: false, youtube_url: '' }] }
       : sec
     ))
   }
@@ -199,38 +189,6 @@ export default function InstructorCourseEditContent({ course, categories, sectio
       ...sec,
       lessons: sec.lessons.filter((_, j) => j !== lIdx),
     }))
-  }
-
-  // ── Видео жүктеу ──
-  async function uploadVideo(sIdx: number, lIdx: number, file: File) {
-    updateLesson(sIdx, lIdx, 'uploading', true)
-
-    const res = await fetch('/api/instructor/upload-video', { method: 'POST' })
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}))
-      updateLesson(sIdx, lIdx, 'uploading', false)
-      alert((lang === 'kk' ? 'Жүктеу қатесі: ' : 'Upload error: ') + (errData.error ?? res.status))
-      return
-    }
-
-    const { uploadUrl, uploadId } = await res.json()
-    await fetch(uploadUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } })
-
-    // Local state жаңарту
-    setLocalSections(s => s.map((sec, i) => i !== sIdx ? sec : {
-      ...sec,
-      lessons: sec.lessons.map((l, j) => j !== lIdx ? l : { ...l, uploading: false, hasVideo: true, mux_upload_id: uploadId }),
-    }))
-
-    // Сабақ DB-де болса — бірден сақтаймыз (бет жаңарса да жоғалмасын)
-    const lessonId = localSections[sIdx]?.lessons[lIdx]?.id
-    if (lessonId) {
-      await fetch(`/api/instructor/lessons/${lessonId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mux_upload_id: uploadId }),
-      })
-    }
   }
 
   const TAB_LABELS = {
@@ -453,62 +411,19 @@ export default function InstructorCourseEditContent({ course, categories, sectio
                       onChange={e => updateLesson(sIdx, lIdx, 'title_ru', e.target.value)}
                     />
 
-                    {/* Видео жүктеу (Mux) */}
-                    {!les.showYtInput && (
-                      <label className="btn btn-ghost btn-sm flex items-center gap-1 cursor-pointer shrink-0"
-                        style={{ fontSize: 12 }}>
-                        {les.uploading ? (
-                          <>
-                            <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/>
-                            </svg>
-                            {lang === 'kk' ? 'Жүктелуде...' : lang === 'en' ? 'Uploading...' : 'Загрузка...'}
-                          </>
-                        ) : les.hasVideo ? (
-                          <>
-                            <Icon name="check" size={12} style={{ color: '#059669' }} />
-                            <span style={{ color: '#059669' }}>{lang === 'kk' ? 'Видео бар' : lang === 'en' ? 'Video added' : 'Видео есть'}</span>
-                          </>
-                        ) : (
-                          <>
-                            <Icon name="upload" size={12} />
-                            {lang === 'kk' ? 'Файл' : 'File'}
-                          </>
-                        )}
-                        <input type="file" accept="video/*" className="hidden"
-                          onChange={e => { const f = e.target.files?.[0]; if (f) uploadVideo(sIdx, lIdx, f) }} />
-                      </label>
-                    )}
-
-                    {/* YouTube URL */}
-                    {les.showYtInput ? (
-                      <div className="flex items-center gap-1 shrink-0" style={{ flex: 2, minWidth: 140 }}>
-                        <input
-                          className="inp b-xs"
-                          style={{ flex: 1, padding: '4px 8px', fontSize: 11 }}
-                          placeholder="https://youtube.com/watch?v=..."
-                          value={les.youtube_url}
-                          onChange={e => updateLesson(sIdx, lIdx, 'youtube_url', e.target.value)}
-                        />
-                        <button
-                          className="btn btn-ghost btn-sm"
-                          style={{ fontSize: 11, padding: '2px 6px', color: '#dc2626' }}
-                          onClick={() => {
-                            updateLesson(sIdx, lIdx, 'youtube_url', '')
-                            updateLesson(sIdx, lIdx, 'showYtInput', false)
-                          }}
-                        >✕</button>
-                      </div>
-                    ) : (
-                      <button
-                        className="btn btn-ghost btn-sm flex items-center gap-1 shrink-0"
-                        style={{ fontSize: 12, color: '#dc2626' }}
-                        onClick={() => updateLesson(sIdx, lIdx, 'showYtInput', true)}
-                      >
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.16 8.16 0 0 0 4.77 1.52V6.75a4.85 4.85 0 0 1-1-.06z"/></svg>
-                        YouTube
-                      </button>
-                    )}
+                    {/* YouTube URL енгізу өрісі */}
+                    <div className="flex items-center gap-1 shrink-0" style={{ flex: 2, minWidth: 160 }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="#dc2626" style={{ flexShrink: 0 }}>
+                        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.16 8.16 0 0 0 4.77 1.52V6.75a4.85 4.85 0 0 1-1-.06z"/>
+                      </svg>
+                      <input
+                        className="inp b-xs"
+                        style={{ flex: 1, padding: '4px 8px', fontSize: 11 }}
+                        placeholder="https://youtube.com/watch?v=..."
+                        value={les.youtube_url}
+                        onChange={e => updateLesson(sIdx, lIdx, 'youtube_url', e.target.value)}
+                      />
+                    </div>
 
                     {/* Тегін қарау */}
                     <label className="flex items-center gap-1 cursor-pointer shrink-0 b-xs"
