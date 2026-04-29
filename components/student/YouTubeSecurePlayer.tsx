@@ -284,15 +284,18 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
       onMouseMove={revealCtrl}
       onMouseLeave={() => { if (playing) setShowCtrl(false) }}
     >
-      {/* YouTube iframe — артық, overflow:hidden кесіп тастайды → YouTube chrome жасырылады */}
-      <div ref={ytRef} style={{ position: 'absolute', top: '-5%', left: '-5%', right: '-5%', bottom: '-12%' }} />
+      {/* YouTube iframe */}
+      <div ref={ytRef} style={{ position: 'absolute', top: '-5%', left: '-5%', right: '-5%', bottom: '-5%' }} />
 
-      {/* Pause overlay — YouTube-тің pause UI-ын жасыру */}
+      {/* Bottom cover — YouTube watermark жасыру */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '14%', background: '#000', zIndex: 3, pointerEvents: 'none' }} />
+
+      {/* Pause overlay — YouTube UI толық жасыру (ойнамай тұрғанда) */}
       {ready && !playing && !ended && (
-        <div style={{ position: 'absolute', inset: 0, zIndex: 4, background: 'rgba(0,0,0,0.45)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, zIndex: 4, background: 'rgba(0,0,0,0.82)', pointerEvents: 'none' }} />
       )}
 
-      {/* Click/hover блокатор — YouTube hover UI шықпасын */}
+      {/* Click/hover блокатор */}
       <div
         style={{ position: 'absolute', inset: 0, zIndex: 5 }}
         onClick={ready ? () => { closeMenus(); togglePlay() } : undefined}

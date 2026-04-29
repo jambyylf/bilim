@@ -385,11 +385,10 @@ export default function LessonPlayer({
                 onClick={() => prevLesson && goLesson(prevLesson.id)}
                 disabled={!prevLesson}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px',
+                  display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px',
                   borderRadius: 8, fontSize: 13, fontWeight: 500,
-                  cursor: prevLesson ? 'pointer' : 'not-allowed',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  background: 'rgba(255,255,255,0.08)',
+                  cursor: prevLesson ? 'pointer' : 'not-allowed', border: 'none',
+                  background: prevLesson ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)',
                   color: prevLesson ? '#fff' : 'rgba(255,255,255,0.25)',
                 }}
               >
@@ -399,22 +398,25 @@ export default function LessonPlayer({
               {!completedIds.has(activeId) && (
                 <button
                   onClick={() => currentLesson && saveProgress(currentLesson.id, currentTime, true)}
-                  className="btn btn-accent btn-sm"
-                  style={{ display: 'flex', alignItems: 'center', gap: 5 }}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    width: 36, height: 36, borderRadius: 8, border: 'none',
+                    background: '#F59E0B', color: '#fff', cursor: 'pointer', flexShrink: 0,
+                  }}
                 >
-                  <Icon name="check" size={13} />
-                  <span className="hidden sm:inline">{tx.mark}</span>
+                  <Icon name="check" size={14} />
                 </button>
               )}
 
               <button
                 onClick={() => nextLesson && goLesson(nextLesson.id)}
                 disabled={!nextLesson}
-                className="btn btn-primary btn-sm"
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 5,
-                  opacity: nextLesson ? 1 : 0.35,
+                  display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px',
+                  borderRadius: 8, fontSize: 13, fontWeight: 500, border: 'none',
                   cursor: nextLesson ? 'pointer' : 'not-allowed',
+                  background: nextLesson ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)',
+                  color: nextLesson ? '#fff' : 'rgba(255,255,255,0.25)',
                 }}
               >
                 {tx.next} <Icon name="chevronLeft" size={13} style={{ transform: 'rotate(180deg)' }} />
