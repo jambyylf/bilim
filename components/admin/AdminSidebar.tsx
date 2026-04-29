@@ -111,11 +111,10 @@ export default function AdminSidebar({ profile, pendingCount = 0 }: Props) {
   return (
     <>
       {/* Mobile top bar */}
-      <header className="md:hidden" style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
-        height: 56, background: 'var(--b-bg)', borderBottom: '1px solid var(--b-line)',
-        display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px',
-      }}>
+      <header
+        className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center gap-3"
+        style={{ height: 56, background: 'var(--b-bg)', borderBottom: '1px solid var(--b-line)', padding: '0 16px' }}
+      >
         <button onClick={() => setMobileOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--b-text)', padding: 8 }}>
           <Icon name="menu" size={22} />
         </button>
