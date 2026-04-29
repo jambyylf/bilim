@@ -4,7 +4,7 @@ import CourseDetailContent from '@/components/catalog/CourseDetailContent'
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const supabase = await createClient()
-  const { data } = await supabase.from('courses').select('title_ru, description_ru').eq('slug', params.slug).single()
+  const { data } = await supabase.from('courses').select('title_ru, description_ru').eq('slug', params.slug).eq('status', 'published' as any).single()
   return {
     title: data?.title_ru ?? 'Курс',
     description: data?.description_ru ?? '',
@@ -23,13 +23,20 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
       rating, students_count, thumbnail_url,
       trailer_mux_id, trailer_mux_playback_id,
       what_you_learn, requirements, created_at,
-      category:categories(slug, name_kk, name_ru, name_en),
-      instructor:profiles!courses_instructor_id_fkey(id, full_name, avatar_url, bio)
+      instructor_id,
+      category:categories(slug, name_kk, name_ru, name_en)
     `)
     .eq('slug', params.slug)
     .single()
 
   if (!course || course.status !== 'published') notFound()
+
+  // Instructor-ды бөлек аламыз (FK hint мәселесін болдырмау үшін)
+  const { data: instructor } = await supabase
+    .from('profiles')
+    .select('id, full_name, avatar_url, bio')
+    .eq('id', (course as any).instructor_id)
+    .single()
 
   // Бөлімдер мен сабақтарды аламыз
   const { data: sections } = await supabase
@@ -62,9 +69,11 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
     enrolled = !!enroll
   }
 
+  const courseWithInstructor = { ...(course as any), instructor: instructor ?? null }
+
   return (
     <CourseDetailContent
-      course={course as any}
+      course={courseWithInstructor}
       sections={(sections as any) ?? []}
       reviews={reviews ?? []}
       enrolled={enrolled}
