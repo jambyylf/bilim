@@ -7,7 +7,6 @@ import TopNav from '@/components/layout/TopNav'
 import Stars from '@/components/shared/Stars'
 import Icon from '@/components/shared/Icon'
 import { useLang } from '@/components/providers/LangProvider'
-import { createClient } from '@/lib/supabase/client'
 
 interface Lesson {
   id: string
@@ -59,8 +58,6 @@ function durM(sec: number) {
 export default function CourseDetailContent({ course, sections, reviews, enrolled, userId }: Props) {
   const { lang, t } = useLang()
   const router = useRouter()
-  const supabase = createClient()
-
   const [enrolling, setEnrolling]   = useState(false)
   const [enrollErr, setEnrollErr]   = useState('')
   const [expandedSecs, setExpanded] = useState<Set<string>>(new Set())
@@ -117,12 +114,15 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
     }
     setEnrolling(true)
     setEnrollErr('')
-    const { error } = await supabase
-      .from('enrollments')
-      .insert({ student_id: userId, course_id: course.id })
-    if (error && error.code !== '23505') {
+    const res = await fetch('/api/student/enroll', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ courseId: course.id }),
+    })
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}))
       setEnrolling(false)
-      setEnrollErr(error.message)
+      setEnrollErr(d.error ?? 'Қате болды, қайталап көріңіз')
       return
     }
     window.location.href = `/courses/${course.slug}/learn`
