@@ -55,7 +55,7 @@ export default function StudentSettingsContent({ profile }: { profile: Profile }
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--b-bg-soft)' }}>
-      <TopNav user={profile} />
+      <TopNav />
 
       <style>{`
         .settings-grid { grid-template-columns: 1fr; }

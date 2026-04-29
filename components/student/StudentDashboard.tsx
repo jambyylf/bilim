@@ -57,7 +57,7 @@ export default function StudentDashboard({ profile, enrollments }: Props) {
 
   return (
     <div style={{ background: 'var(--b-bg)', minHeight: '100vh' }}>
-      <TopNav user={profile} />
+      <TopNav />
 
       <div className="max-w-[1280px] mx-auto px-4 md:px-8 py-6 md:py-10 pb-28 md:pb-10">
         {/* Сәлем */}

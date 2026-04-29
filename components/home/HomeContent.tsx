@@ -39,7 +39,7 @@ export default function HomeContent({ user }: HomeContentProps) {
 
   return (
     <div style={{ background: 'var(--b-bg)', minHeight: '100vh' }}>
-      <TopNav user={user} />
+      <TopNav />
 
       {/* ══════════ HERO ══════════ */}
       <section className="relative overflow-hidden px-4 md:px-8" style={{ padding: '60px 16px 72px' }}>
