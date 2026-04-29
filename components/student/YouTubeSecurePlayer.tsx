@@ -308,13 +308,13 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
         </div>
       )}
 
-      {/* ── Controls — ТҰРАҚТЫ, жасырылмайды → YouTube UI әрқашан астында жабылады ── */}
+      {/* ── Controls ── */}
       {ready && !ended && (
         <div
           style={{
             position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 20,
-            background: 'linear-gradient(transparent, rgba(0,0,0,0.97) 25%, #000 45%)',
-            padding: '40px 14px 10px',
+            background: 'rgba(0,0,0,0.78)',
+            padding: '8px 14px 10px',
           }}
           onClick={e => e.stopPropagation()}
           onMouseMove={e => e.stopPropagation()}

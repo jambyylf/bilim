@@ -217,33 +217,6 @@ export default function LessonPlayer({
         ))}
       </div>
 
-      {/* Notes section at sidebar bottom */}
-      <div style={{ padding: 16, borderTop: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
-        <div style={{
-          color: 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 600,
-          textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8,
-        }}>
-          {tx.notes}{currentTime > 0 ? ` · ${fmtSec(currentTime)}` : ''}
-        </div>
-        <textarea
-          placeholder={currentTime > 0 ? `${fmtSec(currentTime)} ${tx.notePh}` : tx.notePh}
-          value={noteText}
-          onChange={e => setNoteText(e.target.value)}
-          style={{
-            width: '100%', minHeight: 72, boxSizing: 'border-box',
-            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 8, padding: '10px 12px', color: '#fff', fontSize: 13,
-            fontFamily: 'inherit', resize: 'none', outline: 'none',
-          }}
-        />
-        <button
-          className="btn btn-accent btn-sm"
-          style={{ width: '100%', marginTop: 8, justifyContent: 'center' }}
-          onClick={() => { /* save note */ }}
-        >
-          {tx.save}
-        </button>
-      </div>
     </>
   )
 
@@ -315,7 +288,7 @@ export default function LessonPlayer({
       <div className="flex-1 flex min-h-0 overflow-hidden">
 
         {/* LEFT: player column */}
-        <div className="flex-1 flex flex-col min-h-0 overflow-auto">
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
 
           {/* Video */}
           <div style={{ width: '100%', aspectRatio: '16/9', background: '#000', position: 'relative', flexShrink: 0 }}>
@@ -403,6 +376,54 @@ export default function LessonPlayer({
                 {tx.next} <Icon name="chevronLeft" size={13} style={{ transform: 'rotate(180deg)' }} />
               </button>
             </div>
+          </div>
+
+          {/* ── Tab content area ── */}
+          <div style={{ flex: 1, overflowY: 'auto', background: '#0a0e1a', minHeight: 0 }}>
+
+            {/* Жазбалар */}
+            {activeTab === 'notes' && (
+              <div style={{ padding: '20px 24px' }}>
+                <div style={{
+                  color: 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 600,
+                  textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12,
+                }}>
+                  {tx.notes}{currentTime > 0 ? ` · ${fmtSec(currentTime)}` : ''}
+                </div>
+                <textarea
+                  placeholder={currentTime > 0 ? `${fmtSec(currentTime)} ${tx.notePh}` : tx.notePh}
+                  value={noteText}
+                  onChange={e => setNoteText(e.target.value)}
+                  style={{
+                    width: '100%', minHeight: 120, boxSizing: 'border-box',
+                    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: 8, padding: '10px 12px', color: '#fff', fontSize: 13,
+                    fontFamily: 'inherit', resize: 'vertical', outline: 'none',
+                  }}
+                />
+                <button
+                  className="btn btn-accent btn-sm"
+                  style={{ marginTop: 10 }}
+                  onClick={() => { /* save note */ }}
+                >
+                  {tx.save}
+                </button>
+              </div>
+            )}
+
+            {/* Материалдар */}
+            {activeTab === 'resources' && (
+              <div style={{ padding: '40px 24px', color: 'rgba(255,255,255,0.3)', fontSize: 14, textAlign: 'center' }}>
+                {lang === 'kk' ? 'Материалдар жоқ' : lang === 'en' ? 'No resources' : 'Нет материалов'}
+              </div>
+            )}
+
+            {/* Сұрақтар */}
+            {activeTab === 'questions' && (
+              <div style={{ padding: '40px 24px', color: 'rgba(255,255,255,0.3)', fontSize: 14, textAlign: 'center' }}>
+                {lang === 'kk' ? 'Сұрақтар жоқ' : lang === 'en' ? 'No questions' : 'Нет вопросов'}
+              </div>
+            )}
           </div>
         </div>
 
