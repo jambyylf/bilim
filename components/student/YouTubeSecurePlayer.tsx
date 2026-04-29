@@ -354,17 +354,21 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
       onMouseLeave={() => playing && !ended && setShowControls(false)}
       onContextMenu={e => e.preventDefault()}
     >
-      {/* YouTube iframe — scale(1.18) арқылы zoom-in, overflow:hidden шеттерін кеседі.
-          Бұл YouTube logo, controls, "Басқа бейнелер" элементтерін қара жолақсыз жасырады. */}
-      <div
-        ref={ytRef}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          transform: 'scale(1.18) translateY(-3%)',
-          transformOrigin: 'center center',
-        }}
-      />
+      {/* YouTube iframe */}
+      <div ref={ytRef} style={{ position: 'absolute', inset: 0 }} />
+
+      {/* Тұрақты bottom gradient — controls жасырулы болса да YouTube UI-ін жабады */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: '20%',
+        background: 'linear-gradient(transparent, rgba(0,0,0,0.75) 50%, rgba(0,0,0,0.95))',
+        zIndex: 6, pointerEvents: 'none',
+      }} />
+      {/* Тұрақты top gradient */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: '12%',
+        background: 'linear-gradient(rgba(0,0,0,0.65), transparent)',
+        zIndex: 6, pointerEvents: 'none',
+      }} />
 
       {/* Click overlay — ойнату/тоқтату */}
       <div
