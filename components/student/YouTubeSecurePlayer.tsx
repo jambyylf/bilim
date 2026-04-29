@@ -98,7 +98,9 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
   const [curQuality,  setCurQuality]  = useState('auto')
   const [isFs, setIsFs] = useState(false)
   const [showCtrl, setShowCtrl] = useState(true)
-  const ctrlTimer = useRef<ReturnType<typeof setTimeout>>()
+  const ctrlTimer   = useRef<ReturnType<typeof setTimeout>>()
+  const [masked, setMasked] = useState(true)
+  const maskTimer   = useRef<ReturnType<typeof setTimeout>>()
 
   function revealCtrl() {
     setShowCtrl(true)
@@ -110,6 +112,23 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
     if (!playing) { setShowCtrl(true); clearTimeout(ctrlTimer.current) }
     else revealCtrl()
   }, [playing])
+
+  // Ойнай бастағанда 2.5с mask ұстайды → YouTube info overlay жасырылады
+  useEffect(() => {
+    clearTimeout(maskTimer.current)
+    if (playing) {
+      maskTimer.current = setTimeout(() => setMasked(false), 2500)
+    } else {
+      setMasked(true)
+    }
+    return () => clearTimeout(maskTimer.current)
+  }, [playing])
+
+  // Жаңа сабақ жүктелгенде mask қайта қосылады
+  useEffect(() => {
+    setMasked(true)
+    clearTimeout(maskTimer.current)
+  }, [lessonId])
 
   useEffect(() => {
     const fn = () => setIsFs(!!document.fullscreenElement)
@@ -284,15 +303,17 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
       onMouseMove={revealCtrl}
       onMouseLeave={() => { if (playing) setShowCtrl(false) }}
     >
-      {/* YouTube iframe */}
-      <div ref={ytRef} style={{ position: 'absolute', top: '-5%', left: '-5%', right: '-5%', bottom: '-5%' }} />
+      {/* YouTube iframe — астыңғы жағын кеңейтіп watermark кесіп тастаймыз */}
+      <div ref={ytRef} style={{ position: 'absolute', top: '-5%', left: '-5%', right: '-5%', bottom: '-15%' }} />
 
-      {/* Bottom cover — YouTube watermark жасыру */}
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '14%', background: '#000', zIndex: 3, pointerEvents: 'none' }} />
-
-      {/* Pause overlay — YouTube UI толық жасыру (ойнамай тұрғанда) */}
-      {ready && !playing && !ended && (
-        <div style={{ position: 'absolute', inset: 0, zIndex: 4, background: 'rgba(0,0,0,0.82)', pointerEvents: 'none' }} />
+      {/* Mask overlay: pause немесе старт кезінде YouTube UI жасырады, содан кейін жайлап жоғалады */}
+      {ready && !ended && (
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 4, pointerEvents: 'none',
+          background: 'rgba(0,0,0,0.85)',
+          opacity: (!playing || masked) ? 1 : 0,
+          transition: 'opacity 0.8s ease',
+        }} />
       )}
 
       {/* Click/hover блокатор */}
