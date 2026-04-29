@@ -62,6 +62,7 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
   const supabase = createClient()
 
   const [enrolling, setEnrolling]   = useState(false)
+  const [enrollErr, setEnrollErr]   = useState('')
   const [expandedSecs, setExpanded] = useState<Set<string>>(new Set())
   const [timer, setTimer]           = useState(2 * 3600 + 34 * 60 + 18)
   const [revRating, setRevRating]   = useState(0)
@@ -106,15 +107,22 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
   ]
 
   async function enroll() {
-    if (!userId) { router.push('/login?redirect=/courses/' + course.slug); return }
-    if (course.price > 0) { router.push(`/checkout?course=${course.id}`); return }
+    if (!userId) {
+      window.location.href = '/login?redirect=/courses/' + course.slug
+      return
+    }
+    if (course.price > 0) {
+      window.location.href = `/checkout?course=${course.id}`
+      return
+    }
     setEnrolling(true)
+    setEnrollErr('')
     const { error } = await supabase
       .from('enrollments')
       .insert({ student_id: userId, course_id: course.id })
     if (error && error.code !== '23505') {
-      // 23505 = unique violation (already enrolled) — treat as success
       setEnrolling(false)
+      setEnrollErr(error.message)
       return
     }
     window.location.href = `/courses/${course.slug}/learn`
@@ -525,6 +533,9 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
                         ? (lang === 'kk' ? 'Курсқа жазылу' : lang === 'en' ? 'Enroll now' : 'Записаться на курс')
                         : (lang === 'kk' ? 'Тегін бастау' : lang === 'en' ? 'Start free' : 'Начать бесплатно')}
                   </button>
+                  {enrollErr && (
+                    <div style={{ fontSize: 12, color: '#DC2626', marginBottom: 8 }}>{enrollErr}</div>
+                  )}
                   {course.price > 0 && (
                     <button className="btn btn-secondary btn-lg" style={{ width: '100%', marginBottom: 16 }}>
                       {lang === 'kk' ? 'Тегін көру' : lang === 'en' ? 'Try for free' : 'Попробовать бесплатно'}
@@ -601,15 +612,20 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
             {lang === 'kk' ? 'Жалғастыру' : 'Продолжить'}
           </Link>
         ) : (
-          <button onClick={enroll} disabled={enrolling} style={{
-            flex: 1, padding: '13px 0', borderRadius: 10, background: 'var(--b-primary)',
-            color: '#fff', fontWeight: 700, fontSize: 15, border: 'none',
-            cursor: enrolling ? 'not-allowed' : 'pointer', opacity: enrolling ? 0.7 : 1,
-          }}>
-            {enrolling ? '...' : course.price > 0
-              ? (lang === 'kk' ? 'Сатып алу' : 'Купить')
-              : (lang === 'kk' ? 'Тегін бастау' : 'Начать')}
-          </button>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <button onClick={enroll} disabled={enrolling} style={{
+              width: '100%', padding: '13px 0', borderRadius: 10, background: 'var(--b-primary)',
+              color: '#fff', fontWeight: 700, fontSize: 15, border: 'none',
+              cursor: enrolling ? 'not-allowed' : 'pointer', opacity: enrolling ? 0.7 : 1,
+            }}>
+              {enrolling ? '...' : course.price > 0
+                ? (lang === 'kk' ? 'Сатып алу' : 'Купить')
+                : (lang === 'kk' ? 'Тегін бастау' : 'Начать')}
+            </button>
+            {enrollErr && (
+              <div style={{ fontSize: 11, color: '#DC2626', textAlign: 'center' }}>{enrollErr}</div>
+            )}
+          </div>
         )}
       </div>
 
