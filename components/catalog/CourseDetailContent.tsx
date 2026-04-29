@@ -109,9 +109,15 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
     if (!userId) { router.push('/login?redirect=/courses/' + course.slug); return }
     if (course.price > 0) { router.push(`/checkout?course=${course.id}`); return }
     setEnrolling(true)
-    await supabase.from('enrollments').insert({ student_id: userId, course_id: course.id })
-    router.push(`/courses/${course.slug}/learn`)
-    router.refresh()
+    const { error } = await supabase
+      .from('enrollments')
+      .insert({ student_id: userId, course_id: course.id })
+    if (error && error.code !== '23505') {
+      // 23505 = unique violation (already enrolled) — treat as success
+      setEnrolling(false)
+      return
+    }
+    window.location.href = `/courses/${course.slug}/learn`
   }
 
   async function submitReview(e: React.FormEvent) {
