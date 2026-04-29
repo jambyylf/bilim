@@ -4,7 +4,8 @@ import CourseDetailContent from '@/components/catalog/CourseDetailContent'
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const supabase = await createClient()
-  const { data } = await supabase.from('courses').select('title_ru, description_ru').eq('slug', params.slug).eq('status', 'published' as any).single()
+  const slug = decodeURIComponent(params.slug)
+  const { data } = await supabase.from('courses').select('title_ru, description_ru').eq('slug', slug).eq('status', 'published' as any).single()
   return {
     title: data?.title_ru ?? 'Курс',
     description: data?.description_ru ?? '',
@@ -13,8 +14,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
 export default async function CourseDetailPage({ params }: { params: { slug: string } }) {
   const supabase = await createClient()
+  const slug = decodeURIComponent(params.slug)
 
-  const { data: course } = await supabase
+  const { data: course, error: courseError } = await supabase
     .from('courses')
     .select(`
       id, slug, title_kk, title_ru, title_en,
@@ -23,20 +25,23 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
       rating, students_count, thumbnail_url,
       trailer_mux_id, trailer_mux_playback_id,
       what_you_learn, requirements, created_at,
-      instructor_id,
-      category:categories(slug, name_kk, name_ru, name_en)
+      instructor_id, category_id
     `)
-    .eq('slug', params.slug)
-    .single()
+    .eq('slug', slug)
+    .maybeSingle()
 
+  if (courseError) console.error('Course fetch error:', courseError.message)
   if (!course || course.status !== 'published') notFound()
 
-  // Instructor-ды бөлек аламыз (FK hint мәселесін болдырмау үшін)
-  const { data: instructor } = await supabase
-    .from('profiles')
-    .select('id, full_name, avatar_url, bio')
-    .eq('id', (course as any).instructor_id)
-    .single()
+  // Instructor мен category-ды бөлек аламыз (FK join мәселесін болдырмау үшін)
+  const [{ data: instructor }, { data: category }] = await Promise.all([
+    supabase.from('profiles').select('id, full_name, avatar_url, bio')
+      .eq('id', (course as any).instructor_id).maybeSingle(),
+    (course as any).category_id
+      ? supabase.from('categories').select('slug, name_kk, name_ru, name_en')
+          .eq('id', (course as any).category_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ])
 
   // Бөлімдер мен сабақтарды аламыз
   const { data: sections } = await supabase
@@ -69,7 +74,7 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
     enrolled = !!enroll
   }
 
-  const courseWithInstructor = { ...(course as any), instructor: instructor ?? null }
+  const courseWithInstructor = { ...(course as any), instructor: instructor ?? null, category: category ?? null }
 
   return (
     <CourseDetailContent

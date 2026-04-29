@@ -7,7 +7,11 @@ interface LessonInput {
   title_ru: string
   order_idx: number
   is_preview: boolean
-  mux_upload_id?: string
+  mux_upload_id?: string | null
+  youtube_url?: string | null
+  hasVideo?: boolean
+  uploading?: boolean
+  showYtInput?: boolean
 }
 
 interface SectionInput {
@@ -26,7 +30,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   // Тек өз курсын өзгерте алады
   const { data: course } = await supabase
     .from('courses')
-    .select('instructor_id')
+    .select('instructor_id, status')
     .eq('id', params.id)
     .single()
 
@@ -88,12 +92,15 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     for (const les of sec.lessons) {
       if (les.id) {
-        await supabase.from('lessons').update({
-          title_kk:   les.title_kk || '—',
-          title_ru:   les.title_ru || '—',
-          order_idx:  les.order_idx,
-          is_preview: les.is_preview,
-        }).eq('id', les.id)
+        const lessonUpdate: Record<string, unknown> = {
+          title_kk:    les.title_kk || '—',
+          title_ru:    les.title_ru || '—',
+          order_idx:   les.order_idx,
+          is_preview:  les.is_preview,
+          youtube_url: les.youtube_url || null,
+        }
+        if (les.mux_upload_id) lessonUpdate.mux_upload_id = les.mux_upload_id
+        await supabase.from('lessons').update(lessonUpdate as any).eq('id', les.id)
       } else {
         await supabase.from('lessons').insert({
           section_id:    sectionId,
@@ -102,16 +109,20 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
           title_ru:      les.title_ru || '—',
           order_idx:     les.order_idx,
           is_preview:    les.is_preview,
-        })
+          mux_upload_id: les.mux_upload_id || null,
+          youtube_url:   les.youtube_url || null,
+        } as any)
       }
     }
   }
 
-  // 4. Курс статусын pending-ге қою (admin тексеруіне)
-  await supabase
-    .from('courses')
-    .update({ status: 'pending' } as any)
-    .eq('id', params.id)
+  // 4. Тек draft болса ғана pending-ге ауыстыру; published курс статусы өзгермейді
+  if ((course as any).status === 'draft') {
+    await supabase
+      .from('courses')
+      .update({ status: 'pending' } as any)
+      .eq('id', params.id)
+  }
 
   return NextResponse.json({ ok: true })
 }

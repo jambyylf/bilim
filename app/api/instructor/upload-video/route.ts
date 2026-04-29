@@ -3,11 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import Mux from '@mux/mux-node'
 
 // Mux direct upload URL жасайды
-export async function POST(_req: Request) {
-  const mux = new Mux({
-    tokenId:     process.env.MUX_TOKEN_ID!,
-    tokenSecret: process.env.MUX_TOKEN_SECRET!,
-  })
+export async function POST(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -15,21 +11,19 @@ export async function POST(_req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.role !== 'instructor' && profile?.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  // Браузердің нақты origin-ін аламыз (cors үшін)
+  const origin = req.headers.get('origin') ?? process.env.NEXT_PUBLIC_APP_URL ?? '*'
 
   try {
+    const mux = new Mux({
+      tokenId:     process.env.MUX_TOKEN_ID!,
+      tokenSecret: process.env.MUX_TOKEN_SECRET!,
+    })
+
     const upload = await mux.video.uploads.create({
-      cors_origin: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
+      cors_origin: origin,
       new_asset_settings: {
-        playback_policy: ['signed'],
+        playback_policy: ['public'],
         mp4_support: 'none',
       },
     })
@@ -38,7 +32,8 @@ export async function POST(_req: Request) {
       uploadId:  upload.id,
       uploadUrl: upload.url,
     })
-  } catch {
-    return NextResponse.json({ error: 'Mux upload failed' }, { status: 500 })
+  } catch (err: any) {
+    console.error('Mux upload error:', err?.message ?? err)
+    return NextResponse.json({ error: err?.message ?? 'Mux upload failed' }, { status: 500 })
   }
 }

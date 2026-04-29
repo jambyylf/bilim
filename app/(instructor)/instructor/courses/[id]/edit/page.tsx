@@ -32,7 +32,7 @@ export default async function InstructorCourseEditPage({ params }: { params: { i
   const sectionIds = (sections ?? []).map((s: any) => s.id)
 
   const { data: lessons } = sectionIds.length > 0
-    ? await supabase.from('lessons').select('id, title_ru, title_kk, title_en, section_id, order_idx, is_preview, mux_playback_id').in('section_id', sectionIds).order('order_idx')
+    ? await supabase.from('lessons').select('id, title_ru, title_kk, title_en, section_id, order_idx, is_preview, mux_playback_id, mux_upload_id, youtube_url').in('section_id', sectionIds).order('order_idx')
     : { data: [] }
 
   return (
