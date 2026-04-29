@@ -97,6 +97,19 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
   const [qualities,   setQualities]   = useState<string[]>([])
   const [curQuality,  setCurQuality]  = useState('auto')
   const [isFs, setIsFs] = useState(false)
+  const [showCtrl, setShowCtrl] = useState(true)
+  const ctrlTimer = useRef<ReturnType<typeof setTimeout>>()
+
+  function revealCtrl() {
+    setShowCtrl(true)
+    clearTimeout(ctrlTimer.current)
+    ctrlTimer.current = setTimeout(() => setShowCtrl(false), 3000)
+  }
+
+  useEffect(() => {
+    if (!playing) { setShowCtrl(true); clearTimeout(ctrlTimer.current) }
+    else revealCtrl()
+  }, [playing])
 
   useEffect(() => {
     const fn = () => setIsFs(!!document.fullscreenElement)
@@ -263,8 +276,13 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
   return (
     <div
       ref={outerRef}
-      style={{ position: 'absolute', inset: 0, background: '#000', overflow: 'hidden', userSelect: 'none' }}
+      style={{
+        position: 'absolute', inset: 0, background: '#000', overflow: 'hidden', userSelect: 'none',
+        cursor: showCtrl ? 'default' : 'none',
+      }}
       onContextMenu={e => e.preventDefault()}
+      onMouseMove={revealCtrl}
+      onMouseLeave={() => { if (playing) setShowCtrl(false) }}
     >
       {/* YouTube iframe — 5% артық, overflow:hidden кесіп тастайды → YouTube chrome жасырылады */}
       <div ref={ytRef} style={{ position: 'absolute', top: '-5%', left: '-5%', right: '-5%', bottom: '-5%' }} />
@@ -308,13 +326,16 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
         </div>
       )}
 
-      {/* ── Controls ── */}
+      {/* ── Controls — тек hover-да немесе pause-та көрінеді ── */}
       {ready && !ended && (
         <div
           style={{
             position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 20,
-            background: 'rgba(0,0,0,0.78)',
-            padding: '8px 14px 10px',
+            background: 'linear-gradient(transparent, rgba(0,0,0,0.88) 55%)',
+            padding: '32px 14px 10px',
+            opacity: showCtrl ? 1 : 0,
+            pointerEvents: showCtrl ? 'auto' : 'none',
+            transition: 'opacity 0.25s',
           }}
           onClick={e => e.stopPropagation()}
           onMouseMove={e => e.stopPropagation()}
