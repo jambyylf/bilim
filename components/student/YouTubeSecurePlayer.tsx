@@ -316,20 +316,22 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
         }} />
       )}
 
-      {/* Click/hover блокатор */}
+      {/* Click блокатор + орталық play батырмасы */}
       <div
-        style={{ position: 'absolute', inset: 0, zIndex: 5 }}
+        style={{ position: 'absolute', inset: 0, zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         onClick={ready ? () => { closeMenus(); togglePlay() } : undefined}
-      />
-
-      {/* Pause центр батырмасы */}
-      {ready && !playing && !ended && (
-        <div style={{ position: 'absolute', inset: 0, zIndex: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(255,255,255,0.3)' }}>
+      >
+        {ready && !playing && !ended && (
+          <div style={{
+            width: 68, height: 68, borderRadius: '50%',
+            background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(6px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            border: '2px solid rgba(255,255,255,0.35)', pointerEvents: 'none',
+          }}>
             <Ico.Play />
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Жүктелуде */}
       {!ready && !error && (
