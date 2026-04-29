@@ -263,7 +263,7 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
   return (
     <div
       ref={outerRef}
-      style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#000', overflow: 'hidden', userSelect: 'none' }}
+      style={{ position: 'absolute', inset: 0, background: '#000', overflow: 'hidden', userSelect: 'none' }}
       onContextMenu={e => e.preventDefault()}
     >
       {/* YouTube iframe — zoom жоқ, өз өлшемінде */}
