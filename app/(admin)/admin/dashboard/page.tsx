@@ -11,7 +11,7 @@ export default async function AdminDashboardPage() {
     { count: totalCourses },
     { count: totalOrders },
     { data: pendingCourses },
-    { data: recentOrders },
+    { data: recentUsers },
   ] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
     supabase.from('courses').select('id', { count: 'exact', head: true }),
@@ -21,13 +21,13 @@ export default async function AdminDashboardPage() {
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
       .limit(5),
-    supabase.from('orders')
-      .select('id, total_amount, payment_method, payment_status, created_at, student:profiles!orders_student_id_fkey(full_name)')
+    supabase.from('profiles')
+      .select('id, full_name, role, created_at')
       .order('created_at', { ascending: false })
-      .limit(8),
+      .limit(6),
   ])
 
-  // Жалпы табыс
+  // Платформа табысы (20%)
   const { data: revenue } = await supabase
     .from('orders')
     .select('total_amount')
@@ -40,7 +40,7 @@ export default async function AdminDashboardPage() {
     <AdminDashboardContent
       stats={{ totalUsers: totalUsers ?? 0, totalCourses: totalCourses ?? 0, totalOrders: totalOrders ?? 0, platformRevenue }}
       pendingCourses={(pendingCourses as any) ?? []}
-      recentOrders={(recentOrders as any) ?? []}
+      recentUsers={(recentUsers as any) ?? []}
     />
   )
 }

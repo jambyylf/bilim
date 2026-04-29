@@ -25,12 +25,13 @@ export default function AdminSidebar({ profile }: Props) {
   }, [mobileOpen])
 
   const NAV = [
-    { href: '/admin/dashboard', icon: 'grid',   label: 'Dashboard' },
-    { href: '/admin/users',     icon: 'users',  label: lang === 'kk' ? 'Қолданушылар' : lang === 'en' ? 'Users'    : 'Пользователи' },
-    { href: '/admin/courses',   icon: 'book',   label: lang === 'kk' ? 'Курстар'       : lang === 'en' ? 'Courses'  : 'Курсы', badge: null },
-    { href: '/admin/orders',    icon: 'dollar', label: lang === 'kk' ? 'Кіріс'         : lang === 'en' ? 'Revenue'  : 'Доход' },
+    { href: '/admin/dashboard',          icon: 'grid',     label: 'Dashboard' },
+    { href: '/admin/users',              icon: 'users',    label: lang === 'kk' ? 'Қолданушылар' : lang === 'en' ? 'Users'    : 'Пользователи' },
+    { href: '/admin/courses',            icon: 'book',     label: lang === 'kk' ? 'Курстар'       : lang === 'en' ? 'Courses'  : 'Курсы' },
+    { href: '/admin/orders',             icon: 'dollar',   label: lang === 'kk' ? 'Кіріс'         : lang === 'en' ? 'Revenue'  : 'Доход' },
     { href: '/admin/courses?status=pending', icon: 'shield', label: lang === 'kk' ? 'Модерация' : lang === 'en' ? 'Moderate' : 'Модерация', badge: '!' },
-    { href: '/admin/dashboard#analytics',   icon: 'chart',  label: 'Analytics' },
+    { href: '/admin/dashboard#analytics',icon: 'chart',    label: 'Analytics' },
+    { href: '/admin/settings',           icon: 'settings', label: lang === 'kk' ? 'Баптаулар' : lang === 'en' ? 'Settings' : 'Настройки' },
   ]
 
   async function logout() {
