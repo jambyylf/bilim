@@ -30,7 +30,7 @@ interface Course {
   price: number; discount_price: number | null
   language: string; level: string
   rating: number; students_count: number
-  thumbnail_url: string | null; trailer_mux_playback_id: string | null
+  thumbnail_url: string | null
   what_you_learn: string[] | null; requirements: string[] | null
   category: { slug: string; name_kk: string; name_ru: string; name_en: string } | null
   instructor: { id: string; full_name: string | null; avatar_url: string | null; bio: string | null } | null

@@ -7,10 +7,8 @@ interface LessonInput {
   title_ru: string
   order_idx: number
   is_preview: boolean
-  mux_upload_id?: string | null
   youtube_url?: string | null
   hasVideo?: boolean
-  uploading?: boolean
   showYtInput?: boolean
 }
 
@@ -99,18 +97,16 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
           is_preview:  les.is_preview,
           youtube_url: les.youtube_url || null,
         }
-        if (les.mux_upload_id) lessonUpdate.mux_upload_id = les.mux_upload_id
         await supabase.from('lessons').update(lessonUpdate as any).eq('id', les.id)
       } else {
         await supabase.from('lessons').insert({
-          section_id:    sectionId,
-          course_id:     params.id,
-          title_kk:      les.title_kk || '—',
-          title_ru:      les.title_ru || '—',
-          order_idx:     les.order_idx,
-          is_preview:    les.is_preview,
-          mux_upload_id: les.mux_upload_id || null,
-          youtube_url:   les.youtube_url || null,
+          section_id:  sectionId,
+          course_id:   params.id,
+          title_kk:    les.title_kk || '—',
+          title_ru:    les.title_ru || '—',
+          order_idx:   les.order_idx,
+          is_preview:  les.is_preview,
+          youtube_url: les.youtube_url || null,
         } as any)
       }
     }

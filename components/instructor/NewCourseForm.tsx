@@ -50,7 +50,7 @@ export default function NewCourseForm({ categories }: Props) {
     id: string
     titleKk: string
     titleRu: string
-    lessons: { id: string; titleKk: string; titleRu: string; freePreview: boolean; muxUploadId: string; uploading: boolean }[]
+    lessons: { id: string; titleKk: string; titleRu: string; freePreview: boolean; youtubeUrl: string }[]
   }[]>([])
 
   function catName(c: Category) {
@@ -66,36 +66,9 @@ export default function NewCourseForm({ categories }: Props) {
   function addLesson(sectionId: string) {
     setSections(s => s.map(sec =>
       sec.id === sectionId
-        ? { ...sec, lessons: [...sec.lessons, { id: crypto.randomUUID(), titleKk: '', titleRu: '', freePreview: false, muxUploadId: '', uploading: false }] }
+        ? { ...sec, lessons: [...sec.lessons, { id: crypto.randomUUID(), titleKk: '', titleRu: '', freePreview: false, youtubeUrl: '' }] }
         : sec
     ))
-  }
-
-  async function handleVideoUpload(sectionId: string, lessonId: string, file: File) {
-    setSections(s => s.map(sec => ({
-      ...sec,
-      lessons: sec.lessons.map(l => l.id === lessonId ? { ...l, uploading: true } : l),
-    })))
-
-    const res = await fetch('/api/instructor/upload-video', { method: 'POST' })
-    if (!res.ok) {
-      setSections(s => s.map(sec => ({
-        ...sec,
-        lessons: sec.lessons.map(l => l.id === lessonId ? { ...l, uploading: false } : l),
-      })))
-      setError(t.instructor.uploadError)
-      return
-    }
-
-    const { uploadUrl, uploadId } = await res.json()
-
-    // Файлды Mux-қа тікелей жүктеу
-    await fetch(uploadUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } })
-
-    setSections(s => s.map(sec => ({
-      ...sec,
-      lessons: sec.lessons.map(l => l.id === lessonId ? { ...l, uploading: false, muxUploadId: uploadId } : l),
-    })))
   }
 
   async function saveCourse(isDraft: boolean) {
@@ -159,7 +132,8 @@ export default function NewCourseForm({ categories }: Props) {
           title_ru:    les.titleRu || '—',
           order_idx:   li,
           is_preview:  les.freePreview,
-        })
+          youtube_url: les.youtubeUrl || null,
+        } as any)
       }
     }
 
@@ -369,36 +343,17 @@ export default function NewCourseForm({ categories }: Props) {
                       })))}
                     />
 
-                    {/* Видео жүктеу */}
-                    <label className="btn btn-ghost btn-sm flex items-center gap-1.5 cursor-pointer shrink-0">
-                      {les.uploading ? (
-                        <>
-                          <svg className="animate-spin" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-                          </svg>
-                          {t.instructor.uploading}
-                        </>
-                      ) : les.muxUploadId ? (
-                        <>
-                          <Icon name="check" size={13} style={{ color: '#059669' }} />
-                          <span style={{ color: '#059669' }}>{t.instructor.uploadSuccess}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Icon name="upload" size={13} />
-                          {t.instructor.uploadVideo}
-                        </>
-                      )}
-                      <input
-                        type="file"
-                        accept="video/*"
-                        className="hidden"
-                        onChange={e => {
-                          const file = e.target.files?.[0]
-                          if (file) handleVideoUpload(sec.id, les.id, file)
-                        }}
-                      />
-                    </label>
+                    {/* YouTube URL */}
+                    <input
+                      className="inp"
+                      style={{ width: 220, fontSize: 12, padding: '4px 8px', height: 30 }}
+                      placeholder="YouTube URL"
+                      value={les.youtubeUrl}
+                      onChange={e => setSections(s => s.map(s2 => ({
+                        ...s2,
+                        lessons: s2.lessons.map(l => l.id === les.id ? { ...l, youtubeUrl: e.target.value } : l),
+                      })))}
+                    />
 
                     {/* Тегін қарау */}
                     <label className="flex items-center gap-1.5 cursor-pointer shrink-0">

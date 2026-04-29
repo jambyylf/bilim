@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-// Сабаққа видео upload ID-ін бірден сақтайды (бет жаңарса да жоғалмайды)
+// Сабаққа YouTube URL сақтайды
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Сабақ нұсқаушыға тиесілі ме?
   const { data: lesson } = await (supabase as any)
     .from('lessons')
     .select('id, course_id')
@@ -26,13 +25,11 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await req.json()
-  const { mux_upload_id } = body
-
-  if (!mux_upload_id) return NextResponse.json({ error: 'mux_upload_id required' }, { status: 400 })
+  const { youtube_url } = body
 
   const { error } = await (supabase as any)
     .from('lessons')
-    .update({ mux_upload_id })
+    .update({ youtube_url: youtube_url ?? null })
     .eq('id', params.id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

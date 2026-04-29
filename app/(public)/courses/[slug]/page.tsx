@@ -23,7 +23,6 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
       description_kk, description_ru, description_en,
       price, discount_price, language, level, status,
       rating, students_count, thumbnail_url,
-      trailer_mux_id, trailer_mux_playback_id,
       what_you_learn, requirements, created_at,
       instructor_id, category_id
     `)

@@ -91,8 +91,6 @@ export type Database = {
           level: CourseLevel
           status: CourseStatus
           thumbnail_url: string | null
-          trailer_mux_id: string | null
-          trailer_mux_playback_id: string | null
           rating: number
           students_count: number
           what_you_learn: string[] | null
@@ -118,8 +116,6 @@ export type Database = {
           level?: CourseLevel
           status?: CourseStatus
           thumbnail_url?: string | null
-          trailer_mux_id?: string | null
-          trailer_mux_playback_id?: string | null
           what_you_learn?: string[] | null
           requirements?: string[] | null
           published_at?: string | null
@@ -179,8 +175,7 @@ export type Database = {
           title_kk: string
           title_ru: string
           title_en: string
-          mux_asset_id: string | null
-          mux_playback_id: string | null
+          youtube_url: string | null
           duration_sec: number
           order_idx: number
           is_preview: boolean
@@ -194,8 +189,7 @@ export type Database = {
           title_kk: string
           title_ru: string
           title_en?: string
-          mux_asset_id?: string | null
-          mux_playback_id?: string | null
+          youtube_url?: string | null
           duration_sec?: number
           order_idx?: number
           is_preview?: boolean
@@ -204,8 +198,7 @@ export type Database = {
           title_kk?: string
           title_ru?: string
           title_en?: string
-          mux_asset_id?: string | null
-          mux_playback_id?: string | null
+          youtube_url?: string | null
           duration_sec?: number
           order_idx?: number
           is_preview?: boolean

@@ -222,7 +222,7 @@ export default function AdminSettingsContent({ profile, email }: Props) {
               { label: tx.commission,  value: '20%', icon: 'dollar'  },
               { label: tx.instrShare,  value: '80%', icon: 'users'   },
               { label: 'JWT TTL',      value: '1ч / 30 күн', icon: 'clock' },
-              { label: 'Mux DRM',      value: lang === 'kk' ? 'Қосулы' : 'Включено', icon: 'shield' },
+              { label: 'YouTube Embed', value: lang === 'kk' ? 'Қосулы' : 'Включено', icon: 'video' },
               { label: 'RLS (Supabase)', value: lang === 'kk' ? 'Қосулы' : 'Включено', icon: 'lock' },
             ].map(({ label, value, icon }) => (
               <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 0' }}>
