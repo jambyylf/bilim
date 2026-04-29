@@ -5,6 +5,12 @@ export default async function InstructorDashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name, avatar_url')
+    .eq('id', user!.id)
+    .single()
+
   // Спикердің барлық курстарын аламыз
   const { data: courses } = await supabase
     .from('courses')
@@ -31,6 +37,7 @@ export default async function InstructorDashboardPage() {
       reviews={reviews ?? []}
       totalStudents={totalStudents}
       avgRating={avgRating}
+      profile={profile ?? null}
     />
   )
 }

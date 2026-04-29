@@ -21,6 +21,7 @@ interface Review {
 interface Props {
   courses: Course[]; reviews: Review[]
   totalStudents: number; avgRating: string
+  profile?: { full_name: string | null; avatar_url: string | null } | null
 }
 
 function RevenueChart() {
@@ -54,7 +55,7 @@ function RevenueChart() {
   )
 }
 
-export default function InstructorDashboardContent({ courses, reviews, totalStudents, avgRating }: Props) {
+export default function InstructorDashboardContent({ courses, reviews, totalStudents, avgRating, profile }: Props) {
   const { lang, t } = useLang()
 
   function courseTitle(c: Course) {
@@ -127,13 +128,16 @@ export default function InstructorDashboardContent({ courses, reviews, totalStud
       {/* Profile header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
         <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-          <div style={{ width: 64, height: 64, borderRadius: 16, background: 'linear-gradient(135deg, #1E3A8A, #3B82F6)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 22, flexShrink: 0 }}>
-            АС
+          <div style={{ width: 64, height: 64, borderRadius: 16, background: 'linear-gradient(135deg, #1E3A8A, #3B82F6)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 22, flexShrink: 0, overflow: 'hidden' }}>
+            {profile?.avatar_url
+              ? <img src={profile.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
+              : (profile?.full_name?.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() ?? 'СП')
+            }
           </div>
           <div>
             <div className="b-eyebrow" style={{ marginBottom: 6 }}>{tx.title}</div>
             <h1 className="b-h1" style={{ fontSize: 'clamp(20px, 3vw, 28px)' }}>
-              {lang === 'kk' ? 'Спикер кабинеті' : lang === 'en' ? 'Instructor Panel' : 'Кабинет спикера'}
+              {profile?.full_name ?? (lang === 'kk' ? 'Спикер кабинеті' : lang === 'en' ? 'Instructor Panel' : 'Кабинет спикера')}
             </h1>
           </div>
         </div>
