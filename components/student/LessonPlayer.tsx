@@ -422,6 +422,41 @@ export default function LessonPlayer({
             </div>
           </div>
 
+          {/* ── Мобил контент аймағы (тек мобилде көрінеді) ── */}
+          <div className="md:hidden" style={{ flex: 1, background: '#0a0e1a', padding: '16px 20px', minHeight: 120 }}>
+            {activeTab === 'notes' && (
+              <div>
+                <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
+                  {tx.notes}{currentTime > 0 ? ` · ${fmtSec(currentTime)}` : ''}
+                </div>
+                <textarea
+                  placeholder={tx.notePh}
+                  value={noteText}
+                  onChange={e => setNoteText(e.target.value)}
+                  style={{
+                    width: '100%', height: 90, boxSizing: 'border-box',
+                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: 10, padding: '10px 14px', color: '#fff', fontSize: 14,
+                    fontFamily: 'inherit', resize: 'none', outline: 'none',
+                  }}
+                />
+                <button className="btn btn-accent btn-sm" style={{ width: '100%', marginTop: 10, justifyContent: 'center' }} onClick={() => {}}>
+                  {tx.save}
+                </button>
+              </div>
+            )}
+            {activeTab === 'resources' && (
+              <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14, paddingTop: 8 }}>
+                {lang === 'kk' ? 'Материалдар жоқ' : lang === 'en' ? 'No resources' : 'Нет материалов'}
+              </div>
+            )}
+            {activeTab === 'questions' && (
+              <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14, paddingTop: 8 }}>
+                {lang === 'kk' ? 'Сұрақтар жоқ' : lang === 'en' ? 'No questions' : 'Нет вопросов'}
+              </div>
+            )}
+          </div>
+
         </div>
 
         {/* RIGHT: sidebar (desktop only) */}

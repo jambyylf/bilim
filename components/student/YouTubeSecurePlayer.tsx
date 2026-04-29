@@ -284,14 +284,28 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
       onMouseMove={revealCtrl}
       onMouseLeave={() => { if (playing) setShowCtrl(false) }}
     >
-      {/* YouTube iframe — 5% артық, overflow:hidden кесіп тастайды → YouTube chrome жасырылады */}
-      <div ref={ytRef} style={{ position: 'absolute', top: '-5%', left: '-5%', right: '-5%', bottom: '-5%' }} />
+      {/* YouTube iframe — артық, overflow:hidden кесіп тастайды → YouTube chrome жасырылады */}
+      <div ref={ytRef} style={{ position: 'absolute', top: '-5%', left: '-5%', right: '-5%', bottom: '-12%' }} />
+
+      {/* Pause overlay — YouTube-тің pause UI-ын жасыру */}
+      {ready && !playing && !ended && (
+        <div style={{ position: 'absolute', inset: 0, zIndex: 4, background: 'rgba(0,0,0,0.45)', pointerEvents: 'none' }} />
+      )}
 
       {/* Click/hover блокатор — YouTube hover UI шықпасын */}
       <div
         style={{ position: 'absolute', inset: 0, zIndex: 5 }}
         onClick={ready ? () => { closeMenus(); togglePlay() } : undefined}
       />
+
+      {/* Pause центр батырмасы */}
+      {ready && !playing && !ended && (
+        <div style={{ position: 'absolute', inset: 0, zIndex: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(255,255,255,0.3)' }}>
+            <Ico.Play />
+          </div>
+        </div>
+      )}
 
       {/* Жүктелуде */}
       {!ready && !error && (
