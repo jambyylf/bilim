@@ -84,7 +84,7 @@ export default function AdminSettingsContent({ profile, email }: Props) {
   }
 
   return (
-    <div style={{ padding: '28px 32px 80px', background: 'var(--b-bg-soft)', minHeight: '100vh' }}>
+    <div style={{ padding: '48px 32px 80px', background: 'var(--b-bg-soft)', minHeight: '100vh' }}>
 
       {/* Тақырып */}
       <div style={{ marginBottom: 32 }}>

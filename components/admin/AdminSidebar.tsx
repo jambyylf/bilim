@@ -10,9 +10,10 @@ import { createClient } from '@/lib/supabase/client'
 
 interface Props {
   profile: { full_name: string | null; role: string } | null
+  pendingCount?: number
 }
 
-export default function AdminSidebar({ profile }: Props) {
+export default function AdminSidebar({ profile, pendingCount = 0 }: Props) {
   const pathname = usePathname()
   const router   = useRouter()
   const { lang } = useLang()
@@ -29,7 +30,7 @@ export default function AdminSidebar({ profile }: Props) {
     { href: '/admin/users',              icon: 'users',    label: lang === 'kk' ? 'Қолданушылар' : lang === 'en' ? 'Users'    : 'Пользователи' },
     { href: '/admin/courses',            icon: 'book',     label: lang === 'kk' ? 'Курстар'       : lang === 'en' ? 'Courses'  : 'Курсы' },
     { href: '/admin/orders',             icon: 'dollar',   label: lang === 'kk' ? 'Кіріс'         : lang === 'en' ? 'Revenue'  : 'Доход' },
-    { href: '/admin/courses?status=pending', icon: 'shield', label: lang === 'kk' ? 'Модерация' : lang === 'en' ? 'Moderate' : 'Модерация', badge: '!' },
+    { href: '/admin/courses?status=pending', icon: 'shield', label: lang === 'kk' ? 'Модерация' : lang === 'en' ? 'Moderate' : 'Модерация', badge: pendingCount > 0 ? String(pendingCount) : undefined },
     { href: '/admin/dashboard#analytics',icon: 'chart',    label: 'Analytics' },
     { href: '/admin/settings',           icon: 'settings', label: lang === 'kk' ? 'Баптаулар' : lang === 'en' ? 'Settings' : 'Настройки' },
   ]

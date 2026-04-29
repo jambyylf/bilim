@@ -16,9 +16,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   if (profile?.role !== 'admin') redirect('/dashboard')
 
+  const { count: pendingCount } = await supabase
+    .from('courses')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'pending')
+
   return (
     <div className="flex min-h-screen" style={{ background: 'var(--b-bg)' }}>
-      <AdminSidebar profile={profile} />
+      <AdminSidebar profile={profile} pendingCount={pendingCount ?? 0} />
       <main className="flex-1 overflow-auto min-w-0 pt-14 md:pt-0">{children}</main>
     </div>
   )
