@@ -61,16 +61,15 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
   const router = useRouter()
   const supabase = createClient()
 
-  const [enrolling, setEnrolling]     = useState(false)
-  const [expanded, setExpanded]       = useState<Set<string>>(new Set(sections[0] ? [sections[0].id] : []))
-  const [tab, setTab]                 = useState<'program' | 'instructor' | 'reviews'>('program')
-  const [timer, setTimer]             = useState(2 * 3600 + 34 * 60 + 18)
-  const [revRating, setRevRating]     = useState(0)
-  const [revHover, setRevHover]       = useState(0)
-  const [revText, setRevText]         = useState('')
-  const [revSending, setRevSending]   = useState(false)
-  const [revSent, setRevSent]         = useState(false)
-  const [revError, setRevError]       = useState('')
+  const [enrolling, setEnrolling]   = useState(false)
+  const [expandedSecs, setExpanded] = useState<Set<string>>(new Set())
+  const [timer, setTimer]           = useState(2 * 3600 + 34 * 60 + 18)
+  const [revRating, setRevRating]   = useState(0)
+  const [revHover, setRevHover]     = useState(0)
+  const [revText, setRevText]       = useState('')
+  const [revSending, setRevSending] = useState(false)
+  const [revSent, setRevSent]       = useState(false)
+  const [revError, setRevError]     = useState('')
 
   useEffect(() => {
     if (!course.discount_price) return
@@ -93,11 +92,18 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
   const discPct       = course.discount_price ? Math.round((1 - course.discount_price / course.price) * 100) : 0
 
   const lvl: Record<string, string> = {
-    beginner:     lang === 'kk' ? 'Бастаушы'      : lang === 'en' ? 'Beginner'     : 'Начинающий',
+    beginner:     lang === 'kk' ? 'Бастаушыларға' : lang === 'en' ? 'Beginner' : 'Для начинающих',
     intermediate: lang === 'kk' ? 'Орта деңгей'   : lang === 'en' ? 'Intermediate' : 'Средний',
     advanced:     lang === 'kk' ? 'Жоғары деңгей' : lang === 'en' ? 'Advanced'     : 'Продвинутый',
   }
-  const lngL: Record<string, string> = { kk: 'Қазақша', ru: 'Орысша', en: 'English' }
+
+  const features = [
+    `${totalLessons} ${lang === 'kk' ? 'видео-сабақ' : lang === 'en' ? 'video lessons' : 'видео-урока'}`,
+    lang === 'kk' ? 'Аяқтаған соң сертификат' : lang === 'en' ? 'Certificate' : 'Сертификат по окончании',
+    lang === 'kk' ? 'Мәңгілік қолжетімді'     : lang === 'en' ? 'Lifetime access' : 'Доступ навсегда',
+    lang === 'kk' ? 'Ментор қолдауы'           : lang === 'en' ? 'Mentor support'  : 'Поддержка ментора',
+    lang === 'kk' ? 'Мобильдік қолжетімді'     : lang === 'en' ? 'Mobile access'   : 'Доступ с телефона',
+  ]
 
   async function enroll() {
     if (!userId) { router.push('/login?redirect=/courses/' + course.slug); return }
@@ -125,640 +131,464 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
     setExpanded(p => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n })
   }
 
-  const features = [
-    `${totalLessons} ${lang === 'kk' ? 'видео-сабақ' : lang === 'en' ? 'video lessons' : 'видео-урока'}`,
-    lang === 'kk' ? 'Аяқтаған соң сертификат' : lang === 'en' ? 'Certificate' : 'Сертификат по окончании',
-    lang === 'kk' ? 'Мәңгілік қолжетімді'     : lang === 'en' ? 'Lifetime access' : 'Доступ навсегда',
-    lang === 'kk' ? 'Ментор қолдауы'           : lang === 'en' ? 'Mentor support' : 'Поддержка ментора',
-    `${lngL[course.language] ?? course.language} · ${lvl[course.level] ?? course.level}`,
-  ]
+  const catName = course.category
+    ? tr(course.category.name_kk, course.category.name_ru, course.category.name_en)
+    : ''
 
-  /* ─── Purchase card (shared between hero-right and mobile bar) ─── */
-  const card = (
-    <div style={{
-      background: '#fff', borderRadius: 16,
-      boxShadow: '0 2px 8px rgba(0,0,0,0.08), 0 8px 32px rgba(0,0,0,0.14)',
-    }}>
-      <div style={{ padding: '24px 22px' }}>
-
-        {/* Price block */}
-        {course.price === 0 ? (
-          <div style={{ fontSize: 36, fontWeight: 800, color: '#0D9488', marginBottom: 18 }}>
-            {lang === 'kk' ? 'Тегін' : lang === 'en' ? 'Free' : 'Бесплатно'}
-          </div>
-        ) : (
-          <div style={{ marginBottom: 14 }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 30, fontWeight: 800, color: '#111827', letterSpacing: '-0.5px', lineHeight: 1.1 }}>
-                {(course.discount_price ?? course.price).toLocaleString('ru-RU')} {t.common.currency}
-              </span>
-              {course.discount_price && (
-                <span style={{ fontSize: 16, color: '#9CA3AF', textDecoration: 'line-through', fontWeight: 400 }}>
-                  {course.price.toLocaleString('ru-RU')} {t.common.currency}
-                </span>
-              )}
-            </div>
-            {discPct > 0 && (
-              <span style={{
-                display: 'inline-block', marginTop: 8,
-                background: '#FEF3C7', color: '#92400E',
-                fontWeight: 700, fontSize: 12, borderRadius: 6, padding: '3px 9px',
-              }}>
-                −{discPct}%
-              </span>
-            )}
-            {course.discount_price && timer > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6 }}>
-                <Icon name="clock" size={12} style={{ color: '#F59E0B', flexShrink: 0 }} />
-                <span style={{ fontSize: 12, color: '#F59E0B', fontWeight: 600 }}>
-                  {lang === 'kk' ? 'Жеңілдік аяқталады:' : lang === 'en' ? 'Offer ends:' : 'Скидка действует ещё:'}{' '}
-                  {p2(Math.floor(timer / 3600))}:{p2(Math.floor((timer % 3600) / 60))}:{p2(timer % 60)}
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* CTA buttons */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 18 }}>
-          {enrolled ? (
-            <Link href={`/courses/${course.slug}/learn`} style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              padding: '14px 0', borderRadius: 10, background: '#1E3A8A', color: '#fff',
-              fontWeight: 700, fontSize: 15, textDecoration: 'none',
-            }}>
-              <Icon name="play" size={16} />
-              {lang === 'kk' ? 'Жалғастыру' : lang === 'en' ? 'Continue learning' : 'Продолжить'}
-            </Link>
-          ) : (
-            <>
-              <button onClick={enroll} disabled={enrolling} style={{
-                padding: '14px 0', borderRadius: 10, background: '#1E3A8A', color: '#fff',
-                fontWeight: 700, fontSize: 15, border: 'none',
-                cursor: enrolling ? 'not-allowed' : 'pointer', opacity: enrolling ? 0.7 : 1,
-              }}>
-                {enrolling
-                  ? t.common.loading
-                  : course.price > 0
-                    ? (lang === 'kk' ? 'Курсқа жазылу' : lang === 'en' ? 'Enroll now' : 'Записаться на курс')
-                    : t.course.enroll}
-              </button>
-              {course.price > 0 && (
-                <button style={{
-                  padding: '13px 0', borderRadius: 10, background: 'transparent',
-                  color: '#1E3A8A', fontWeight: 600, fontSize: 14,
-                  border: '1.5px solid #1E3A8A', cursor: 'pointer',
-                }}>
-                  {lang === 'kk' ? 'Тегін көру' : lang === 'en' ? 'Try for free' : 'Попробовать бесплатно'}
-                </button>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Wishlist / share */}
-        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-          {[
-            { icon: 'heart', label: lang === 'kk' ? 'Сақтау' : lang === 'en' ? 'Save' : 'В избранное' },
-            { icon: 'upload', label: lang === 'kk' ? 'Бөлісу' : lang === 'en' ? 'Share' : 'Поделиться' },
-          ].map(({ icon, label }) => (
-            <button key={label} style={{
-              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-              padding: '9px 0', borderRadius: 8, background: '#F9FAFB',
-              border: '1px solid #E5E7EB', color: '#374151', fontWeight: 500, fontSize: 13, cursor: 'pointer',
-            }}>
-              <Icon name={icon} size={14} /> {label}
-            </button>
-          ))}
-        </div>
-
-        {/* Divider */}
-        <div style={{ height: 1, background: '#F3F4F6', margin: '18px 0 16px' }} />
-
-        {/* Features */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {features.map((f, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" style={{ flexShrink: 0 }}>
-                <path d="m4 12 5 5L20 6"/>
-              </svg>
-              <span style={{ fontSize: 13, color: '#374151' }}>{f}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Guarantee */}
-        {course.price > 0 && (
-          <div style={{
-            marginTop: 18, paddingTop: 16, borderTop: '1px solid #F3F4F6',
-            display: 'flex', alignItems: 'center', gap: 10,
-          }}>
-            <Icon name="shield" size={18} style={{ color: '#9CA3AF', flexShrink: 0 }} />
-            <span style={{ fontSize: 12, color: '#6B7280', lineHeight: 1.5 }}>
-              {lang === 'kk'
-                ? '14 күн ішінде ақша қайтарым кепілдігі'
-                : lang === 'en' ? '14-day money-back guarantee'
-                : '14 дней — вернём деньги без вопросов'}
-            </span>
-          </div>
-        )}
-      </div>
-    </div>
-  )
+  const initials = course.instructor?.full_name
+    ? course.instructor.full_name.split(' ').map(w => w[0]).slice(0, 2).join('')
+    : '?'
 
   return (
-    <div style={{ background: '#F9FAFB', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--b-bg)', minHeight: '100vh' }}>
       <TopNav />
 
-      {/* ═══════════════════════════════════════════════
-          HERO — dark gradient background
-      ═══════════════════════════════════════════════ */}
-      <section className={`thumb-grad-${grad} thumb-pattern`}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px' }}>
 
-          {/* Breadcrumbs */}
-          <div style={{ paddingTop: 14, paddingBottom: 10, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-            <Link href="/courses" style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, textDecoration: 'none' }}>
-              {lang === 'kk' ? 'Каталог' : lang === 'en' ? 'Catalog' : 'Каталог'}
+        {/* Breadcrumbs */}
+        <div className="b-sm" style={{ color: 'var(--b-text-3)', padding: '24px 0 0' }}>
+          <Link href="/courses" style={{ color: 'var(--b-text-3)', textDecoration: 'none' }}>
+            {lang === 'kk' ? 'Каталог' : lang === 'en' ? 'Catalog' : 'Каталог'}
+          </Link>
+          {catName && <>
+            <span style={{ margin: '0 6px' }}>·</span>
+            <Link href={`/courses?category=${course.category?.slug}`} style={{ color: 'var(--b-text-3)', textDecoration: 'none' }}>
+              {catName}
             </Link>
-            {course.category && <>
-              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>›</span>
-              <Link href={`/courses?category=${course.category.slug}`}
-                style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, textDecoration: 'none' }}>
-                {tr(course.category.name_kk, course.category.name_ru, course.category.name_en)}
-              </Link>
-            </>}
-            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>›</span>
-            <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>
-              {title.slice(0, 30)}{title.length > 30 ? '…' : ''}
-            </span>
-          </div>
-
-          {/* Two-column grid */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1fr)',
-            gap: 32,
-            paddingTop: 20,
-            paddingBottom: 48,
-          }}
-            className="cd-hero-grid"
-          >
-            {/* ── LEFT: info + video ── */}
-            <div>
-              {/* Chips */}
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
-                {course.category && (
-                  <span style={{
-                    padding: '4px 14px', borderRadius: 999, fontSize: 12, fontWeight: 600,
-                    background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)',
-                  }}>
-                    {tr(course.category.name_kk, course.category.name_ru, course.category.name_en)}
-                  </span>
-                )}
-                <span style={{
-                  padding: '4px 14px', borderRadius: 999, fontSize: 12, fontWeight: 600,
-                  background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)',
-                }}>
-                  {lang === 'kk' ? 'Бастаушылар үшін' : lang === 'en' ? 'For beginners' : 'Для начинающих'}
-                </span>
-                {course.students_count > 100 && (
-                  <span style={{
-                    padding: '4px 14px', borderRadius: 999, fontSize: 12, fontWeight: 700,
-                    background: '#F59E0B', color: '#000',
-                  }}>
-                    {lang === 'kk' ? 'Үздік таңдау' : lang === 'en' ? 'Bestseller' : 'Бестселлер'}
-                  </span>
-                )}
-              </div>
-
-              {/* Title */}
-              <h1 style={{
-                fontSize: 'clamp(20px, 2.8vw, 32px)', fontWeight: 800, color: '#fff',
-                lineHeight: 1.25, marginBottom: 12, maxWidth: 640,
-              }}>
-                {title}
-              </h1>
-
-              {/* Description */}
-              {desc && (
-                <p style={{
-                  fontSize: 15, color: 'rgba(255,255,255,0.8)',
-                  maxWidth: 580, marginBottom: 16, lineHeight: 1.65,
-                }}>
-                  {desc.slice(0, 200)}{desc.length > 200 ? '…' : ''}
-                </p>
-              )}
-
-              {/* Stats row */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 24 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <Stars value={course.rating} size={14} />
-                  <span style={{ fontWeight: 700, color: '#F59E0B', fontSize: 14 }}>
-                    {course.rating.toFixed(1)}
-                  </span>
-                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>
-                    ({reviews.length} {lang === 'kk' ? 'пікір' : lang === 'en' ? 'reviews' : 'голосов'})
-                  </span>
-                </div>
-                <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: 13 }}>
-                  👥 {course.students_count.toLocaleString('ru-RU')} {lang === 'kk' ? 'студент' : lang === 'en' ? 'students' : 'студентов'}
-                </span>
-                <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: 13 }}>
-                  ⏱ {durH(totalDuration)}
-                </span>
-                <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: 13 }}>
-                  📚 {sections.length} · {totalLessons}
-                </span>
-              </div>
-
-              {/* Video thumbnail */}
-              <div style={{
-                position: 'relative', width: '100%', maxWidth: 540,
-                borderRadius: 14, overflow: 'hidden', cursor: 'pointer',
-                aspectRatio: '16/9', background: '#000', marginBottom: 22,
-                boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-              }}>
-                {course.thumbnail_url
-                  ? <img src={course.thumbnail_url} alt={title}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <div className={`thumb-grad-${grad} thumb-pattern`} style={{ width: '100%', height: '100%' }} />
-                }
-                <div style={{
-                  position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.22)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <div style={{
-                    width: 64, height: 64, borderRadius: '50%',
-                    background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)',
-                    border: '2px solid rgba(255,255,255,0.5)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff" style={{ marginLeft: 4 }}>
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                  </div>
-                </div>
-                <div style={{
-                  position: 'absolute', bottom: 12, left: 12,
-                  background: 'rgba(0,0,0,0.65)', color: '#fff',
-                  fontSize: 12, fontWeight: 600, borderRadius: 6, padding: '4px 10px',
-                  display: 'flex', alignItems: 'center', gap: 5,
-                }}>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
-                  {lang === 'kk' ? 'Трейлерді көру' : lang === 'en' ? 'Watch trailer' : 'Смотреть трейлер'}
-                  {totalDuration > 0 && ` · ${durM(Math.min(totalDuration, 180))}`}
-                </div>
-              </div>
-
-              {/* Instructor */}
-              {course.instructor && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{
-                    width: 32, height: 32, borderRadius: '50%',
-                    background: 'rgba(255,255,255,0.2)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#fff', fontWeight: 700, fontSize: 13, flexShrink: 0,
-                  }}>
-                    {course.instructor.full_name?.[0] ?? '?'}
-                  </div>
-                  <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>
-                    {course.instructor.full_name}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* ── RIGHT: purchase card (desktop sticky) ── */}
-            <div className="cd-card-col">
-              <div style={{ position: 'sticky', top: 80 }}>{card}</div>
-            </div>
-          </div>
+          </>}
+          <span style={{ margin: '0 6px' }}>·</span>
+          <span style={{ color: 'var(--b-text)' }}>{title.slice(0, 40)}{title.length > 40 ? '…' : ''}</span>
         </div>
-      </section>
 
-      <style>{`
-        @media (min-width: 960px) {
-          .cd-hero-grid { grid-template-columns: minmax(0,1fr) 380px !important; gap: 40px !important; align-items: start; }
-          .cd-card-col  { display: block !important; }
-          .cd-mob-bar   { display: none !important; }
-        }
-        .cd-card-col { display: none; }
-        .cd-mob-bar  { display: flex; }
-      `}</style>
+        {/* Main two-column grid */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: '1fr 380px', gap: 48,
+          alignItems: 'flex-start', padding: '32px 0 80px',
+        }} className="cd-grid">
 
-      {/* ═══════════════════════════════════════════════
-          STICKY TABS
-      ═══════════════════════════════════════════════ */}
-      <div style={{
-        position: 'sticky', top: 64, zIndex: 30,
-        background: '#fff', borderBottom: '1px solid #E5E7EB',
-      }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px', overflowX: 'auto' }}>
-          <div style={{ display: 'flex', minWidth: 'max-content' }}>
-            {([
-              ['program',    t.course.program],
-              ['instructor', t.course.aboutInstructor],
-              ['reviews',    t.course.reviews],
-            ] as const).map(([key, label]) => (
-              <button key={key} onClick={() => setTab(key)} style={{
-                padding: '16px 22px', fontSize: 14, fontWeight: tab === key ? 700 : 500,
-                color: tab === key ? '#1E3A8A' : '#6B7280',
-                background: 'transparent', border: 'none', cursor: 'pointer',
-                borderBottom: tab === key ? '2px solid #1E3A8A' : '2px solid transparent',
-                transition: 'all 0.15s', whiteSpace: 'nowrap',
-              }}>
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════
-          CONTENT (single column max-w-860)
-      ═══════════════════════════════════════════════ */}
-      <div style={{ maxWidth: 860, margin: '0 auto', padding: '32px 20px 120px' }}>
-
-        {/* ── PROGRAM ── */}
-        {tab === 'program' && (
+          {/* ── LEFT COLUMN ── */}
           <div>
-            {/* What you'll learn */}
-            {course.what_you_learn && course.what_you_learn.length > 0 && (
-              <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: 24, marginBottom: 28 }}>
-                <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', marginBottom: 16 }}>
-                  {lang === 'kk' ? 'Не үйренесіз' : lang === 'en' ? "What you'll learn" : 'Чему вы научитесь'}
-                </h2>
-                <div style={{ display: 'grid', gap: '10px 40px', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
-                  {course.what_you_learn.map((item, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, color: '#374151' }}>
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" style={{ flexShrink: 0, marginTop: 2 }}>
-                        <path d="m4 12 5 5L20 6"/>
-                      </svg>
-                      {item}
+            {/* Chips */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+              {catName && <span className="chip chip-primary">{catName}</span>}
+              {course.level && <span className="chip">{lvl[course.level] ?? course.level}</span>}
+              {course.students_count > 100 && <span className="chip chip-accent">
+                {lang === 'kk' ? 'Бестселлер' : lang === 'en' ? 'Bestseller' : 'Бестселлер'}
+              </span>}
+            </div>
+
+            {/* Title */}
+            <h1 className="b-h1" style={{ fontSize: 44, marginBottom: 20, maxWidth: 720, lineHeight: 1.15 }}>
+              {title}
+            </h1>
+
+            {/* Description */}
+            {desc && (
+              <p className="b-body" style={{ color: 'var(--b-text-2)', maxWidth: 680, marginBottom: 24, fontSize: 17, lineHeight: 1.65 }}>
+                {desc.slice(0, 280)}{desc.length > 280 ? '…' : ''}
+              </p>
+            )}
+
+            {/* Stats row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
+              <Stars value={course.rating} />
+              <span className="b-sm" style={{ color: 'var(--b-text-3)' }}>
+                {reviews.length} {lang === 'kk' ? 'пікір' : lang === 'en' ? 'reviews' : 'отзывов'}
+              </span>
+              <span className="b-sm" style={{ color: 'var(--b-text-3)', display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                <Icon name="users" size={14} />
+                {course.students_count.toLocaleString('ru-RU')} {lang === 'kk' ? 'студент' : lang === 'en' ? 'students' : 'студентов'}
+              </span>
+              <span className="b-sm" style={{ color: 'var(--b-text-3)', display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                <Icon name="clock" size={14} />
+                {durH(totalDuration)}
+              </span>
+              <span className="b-sm" style={{ color: 'var(--b-text-3)', display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                <Icon name="globe" size={14} />
+                KZ · RU
+              </span>
+            </div>
+
+            {/* Trailer / thumbnail */}
+            <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', marginBottom: 40 }}>
+              <div style={{ height: 420, background: 'var(--b-bg-soft)' }} className={`thumb-grad-${grad} thumb-pattern`} />
+              {course.thumbnail_url && (
+                <img src={course.thumbnail_url} alt={title} style={{
+                  position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
+                }} />
+              )}
+              <button style={{
+                position: 'absolute', inset: 0, margin: 'auto', width: 72, height: 72,
+                borderRadius: '50%', background: 'rgba(255,255,255,0.95)', border: 'none',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', color: 'var(--b-primary)', boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
+              }}>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </button>
+              <div style={{
+                position: 'absolute', bottom: 16, left: 16, padding: '6px 12px',
+                background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+                borderRadius: 999, color: '#fff', fontSize: 12, fontWeight: 500,
+              }}>
+                {lang === 'kk' ? 'Трейлерді көру' : lang === 'en' ? 'Watch trailer' : 'Смотреть трейлер'} · 2:14
+              </div>
+            </div>
+
+            {/* ── PROGRAM ── */}
+            <div style={{ marginBottom: 48 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20 }}>
+                <div>
+                  <h2 className="b-h2" style={{ marginBottom: 4 }}>
+                    {lang === 'kk' ? 'Курс бағдарламасы' : lang === 'en' ? 'Course program' : 'Программа курса'}
+                  </h2>
+                  <p className="b-sm" style={{ color: 'var(--b-text-3)' }}>
+                    {sections.length} {lang === 'kk' ? 'модуль' : lang === 'en' ? 'modules' : 'модулей'}{' · '}
+                    {totalLessons} {lang === 'kk' ? 'сабақ' : lang === 'en' ? 'lessons' : 'уроков'}{' · '}
+                    {durH(totalDuration)}
+                  </p>
+                </div>
+                <button
+                  className="btn btn-link"
+                  onClick={() => setExpanded(
+                    expandedSecs.size === sections.length
+                      ? new Set()
+                      : new Set(sections.map(s => s.id))
+                  )}
+                >
+                  {expandedSecs.size === sections.length
+                    ? (lang === 'kk' ? 'Барлығын жабу' : lang === 'en' ? 'Collapse all' : 'Свернуть всё')
+                    : (lang === 'kk' ? 'Барлығын ашу'  : lang === 'en' ? 'Expand all'   : 'Развернуть всё')}
+                </button>
+              </div>
+
+              <div className="card" style={{ padding: 0 }}>
+                {[...sections].sort((a, b) => a.order_idx - b.order_idx).map((sec, si) => {
+                  const open = expandedSecs.has(sec.id)
+                  const secDur = sec.lessons.reduce((s, l) => s + l.duration_sec, 0)
+                  return (
+                    <div key={sec.id} style={{ borderBottom: si < sections.length - 1 ? '1px solid var(--b-line)' : 'none' }}>
+                      <div
+                        onClick={() => toggleSec(sec.id)}
+                        style={{ padding: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16 }}
+                      >
+                        <span className="b-mono" style={{ fontSize: 12, color: 'var(--b-text-4)', width: 28, flexShrink: 0 }}>
+                          {p2(si + 1)}
+                        </span>
+                        <div style={{ flex: 1 }}>
+                          <div className="b-h4" style={{ fontWeight: 500, marginBottom: 2 }}>
+                            {tr(sec.title_kk, sec.title_ru, sec.title_en)}
+                          </div>
+                          <div className="b-xs" style={{ color: 'var(--b-text-3)' }}>
+                            {sec.lessons.length} {lang === 'kk' ? 'сабақ' : lang === 'en' ? 'lessons' : 'уроков'} · {durM(secDur)}
+                          </div>
+                        </div>
+                        <Icon name={open ? 'chevronUp' : 'chevronDown'} size={16} style={{ color: 'var(--b-text-4)' }} />
+                      </div>
+
+                      {open && (
+                        <div style={{ borderTop: '1px solid var(--b-line-soft)' }}>
+                          {[...sec.lessons].sort((a, b) => a.order_idx - b.order_idx).map((lesson, li) => (
+                            <div key={lesson.id} style={{
+                              display: 'flex', alignItems: 'center', gap: 12,
+                              padding: '10px 18px 10px 62px',
+                              borderBottom: li < sec.lessons.length - 1 ? '1px solid var(--b-line-soft)' : 'none',
+                            }}>
+                              {lesson.is_preview
+                                ? <Icon name="playCircle" size={15} style={{ color: 'var(--b-primary)', flexShrink: 0 }} />
+                                : <Icon name="lock" size={13} style={{ color: 'var(--b-text-4)', flexShrink: 0 }} />
+                              }
+                              <span className="b-sm" style={{ flex: 1, color: 'var(--b-text-2)' }}>
+                                {tr(lesson.title_kk, lesson.title_ru, lesson.title_en)}
+                              </span>
+                              {lesson.is_preview && (
+                                <span style={{
+                                  fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 6,
+                                  background: '#EEF2FF', color: 'var(--b-primary)',
+                                }}>
+                                  {lang === 'kk' ? 'Тегін' : lang === 'en' ? 'Preview' : 'Бесплатно'}
+                                </span>
+                              )}
+                              {lesson.duration_sec > 0 && (
+                                <span className="b-xs" style={{ color: 'var(--b-text-4)', flexShrink: 0 }}>
+                                  {durM(lesson.duration_sec)}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  ))}
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* ── INSTRUCTOR ── */}
+            {course.instructor && (
+              <div style={{ marginBottom: 48 }}>
+                <h2 className="b-h2" style={{ marginBottom: 20 }}>
+                  {lang === 'kk' ? 'Спикер туралы' : lang === 'en' ? 'About instructor' : 'О спикере'}
+                </h2>
+                <div className="card" style={{ padding: 28, display: 'flex', gap: 24 }}>
+                  <div style={{
+                    width: 96, height: 96, borderRadius: 16, flexShrink: 0,
+                    background: 'linear-gradient(135deg, #1E3A8A, #3B82F6)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#fff', fontWeight: 700, fontSize: 32,
+                  }}>
+                    {initials}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div className="b-h3" style={{ marginBottom: 4 }}>{course.instructor.full_name}</div>
+                    <div className="b-sm" style={{ color: 'var(--b-text-3)', marginBottom: 14 }}>
+                      {lang === 'kk' ? 'Спикер' : lang === 'en' ? 'Instructor' : 'Спикер'}
+                    </div>
+                    {course.instructor.bio && (
+                      <p className="b-sm" style={{ color: 'var(--b-text-2)', lineHeight: 1.6, marginBottom: 16 }}>
+                        {course.instructor.bio}
+                      </p>
+                    )}
+                    <div style={{ display: 'flex', gap: 24 }}>
+                      {[
+                        { n: course.rating.toFixed(1), l: lang === 'kk' ? 'рейтинг' : 'рейтинг' },
+                        { n: course.students_count.toLocaleString('ru-RU'), l: lang === 'kk' ? 'студент' : 'студентов' },
+                        { n: String(sections.length), l: lang === 'kk' ? 'модуль' : 'модулей' },
+                      ].map(({ n, l }) => (
+                        <div key={l}>
+                          <div className="b-h3" style={{ color: 'var(--b-text)' }}>{n}</div>
+                          <div className="b-xs" style={{ color: 'var(--b-text-3)' }}>{l}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Curriculum header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
-              <div>
-                <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', marginBottom: 4 }}>
-                  {t.course.program}
+            {/* ── REVIEWS ── */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20 }}>
+                <h2 className="b-h2">
+                  {lang === 'kk' ? 'Студенттер пікірлері' : lang === 'en' ? 'Student reviews' : 'Отзывы студентов'}
                 </h2>
-                <span style={{ fontSize: 13, color: '#6B7280' }}>
-                  {sections.length} {lang === 'kk' ? 'бөлімдер' : lang === 'en' ? 'sections' : 'разделов'}{' · '}
-                  {totalLessons} {lang === 'kk' ? 'сабақ' : lang === 'en' ? 'lessons' : 'уроков'}{' · '}
-                  {durH(totalDuration)}
-                </span>
-              </div>
-              <button
-                onClick={() => setExpanded(
-                  expanded.size === sections.length
-                    ? new Set()
-                    : new Set(sections.map(s => s.id))
+                {reviews.length > 0 && (
+                  <button className="btn btn-link">
+                    {lang === 'kk' ? `Барлық ${reviews.length} пікір` : lang === 'en' ? `All ${reviews.length} reviews` : `Все ${reviews.length} отзывов`}
+                  </button>
                 )}
-                style={{ fontSize: 13, fontWeight: 600, color: '#1E3A8A', background: 'none', border: 'none', cursor: 'pointer' }}
-              >
-                {expanded.size === sections.length
-                  ? (lang === 'kk' ? 'Барлығын жабу' : lang === 'en' ? 'Collapse all' : 'Свернуть всё')
-                  : (lang === 'kk' ? 'Барлығын ашу' : lang === 'en' ? 'Expand all' : 'Развернуть всё')}
-              </button>
-            </div>
+              </div>
 
-            {/* Sections */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {[...sections].sort((a, b) => a.order_idx - b.order_idx).map((sec, si) => {
-                const open   = expanded.has(sec.id)
-                const secDur = sec.lessons.reduce((s, l) => s + l.duration_sec, 0)
-                return (
-                  <div key={sec.id} style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', overflow: 'hidden' }}>
-                    <button onClick={() => toggleSec(sec.id)} style={{
-                      width: '100%', display: 'flex', alignItems: 'center', gap: 14,
-                      padding: '16px 20px', background: open ? '#F8FAFF' : '#fff',
-                      border: 'none', cursor: 'pointer', textAlign: 'left', minHeight: 56,
-                    }}>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: '#9CA3AF', minWidth: 22, flexShrink: 0 }}>
-                        {p2(si + 1)}
-                      </span>
-                      <span style={{ flex: 1, fontSize: 15, fontWeight: 600, color: '#111827' }}>
-                        {tr(sec.title_kk, sec.title_ru, sec.title_en)}
-                      </span>
-                      <span style={{ fontSize: 12, color: '#9CA3AF', whiteSpace: 'nowrap' }}>
-                        {sec.lessons.length} {lang === 'kk' ? 'сабақ' : 'урок'} · {durM(secDur)}
-                      </span>
-                      <Icon name={open ? 'chevronUp' : 'chevronDown'} size={16} style={{ color: '#9CA3AF', flexShrink: 0 }} />
-                    </button>
-
-                    {open && (
-                      <div style={{ borderTop: '1px solid #F3F4F6' }}>
-                        {[...sec.lessons].sort((a, b) => a.order_idx - b.order_idx).map((lesson, li) => (
-                          <div key={lesson.id} style={{
-                            display: 'flex', alignItems: 'center', gap: 12,
-                            padding: '11px 20px 11px 56px',
-                            borderBottom: li < sec.lessons.length - 1 ? '1px solid #F9FAFB' : 'none',
-                            minHeight: 46,
-                          }}>
-                            {lesson.is_preview
-                              ? <Icon name="playCircle" size={16} style={{ color: '#1E3A8A', flexShrink: 0 }} />
-                              : <Icon name="lock" size={14} style={{ color: '#D1D5DB', flexShrink: 0 }} />
-                            }
-                            <span style={{ flex: 1, fontSize: 13, color: '#374151' }}>
-                              {tr(lesson.title_kk, lesson.title_ru, lesson.title_en)}
-                            </span>
-                            {lesson.is_preview && (
-                              <span style={{
-                                fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 6,
-                                background: '#EEF2FF', color: '#1E3A8A', flexShrink: 0,
-                              }}>
-                                {lang === 'kk' ? 'Тегін қарау' : lang === 'en' ? 'Preview' : 'Бесплатно'}
-                              </span>
-                            )}
-                            {lesson.duration_sec > 0 && (
-                              <span style={{ fontSize: 12, color: '#9CA3AF', flexShrink: 0 }}>
-                                {durM(lesson.duration_sec)}
-                              </span>
-                            )}
-                          </div>
-                        ))}
+              {/* Review form */}
+              {enrolled && !alreadyReviewed && !revSent && (
+                <div className="card" style={{ padding: 24, marginBottom: 20 }}>
+                  <div className="b-h4" style={{ marginBottom: 16 }}>
+                    {lang === 'kk' ? 'Пікір жазу' : lang === 'en' ? 'Write a review' : 'Написать отзыв'}
+                  </div>
+                  <form onSubmit={submitReview} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      {[1,2,3,4,5].map(s => (
+                        <button key={s} type="button"
+                          onMouseEnter={() => setRevHover(s)} onMouseLeave={() => setRevHover(0)}
+                          onClick={() => setRevRating(s)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+                          <svg width="28" height="28" viewBox="0 0 24 24"
+                            fill={(revHover || revRating) >= s ? '#F59E0B' : 'none'} stroke="#F59E0B" strokeWidth="1.5">
+                            <path d="M12 2 14.6 8.6 22 9.5l-5.5 4.8L18 22l-6-3.4L6 22l1.5-7.7L2 9.5l7.4-.9z"/>
+                          </svg>
+                        </button>
+                      ))}
+                    </div>
+                    <textarea className="inp" rows={3} value={revText} onChange={e => setRevText(e.target.value)}
+                      placeholder={lang === 'kk' ? 'Курс туралы пікіріңіз...' : 'Ваши впечатления...'} style={{ resize: 'vertical' }} />
+                    {revError && (
+                      <div style={{ fontSize: 13, padding: '10px 14px', borderRadius: 8, background: '#FEE2E2', color: '#DC2626' }}>
+                        {revError}
                       </div>
                     )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
+                    <button type="submit" disabled={revSending || !revRating} style={{
+                      alignSelf: 'flex-start', padding: '10px 20px', borderRadius: 8,
+                      background: 'var(--b-primary)', color: '#fff', fontWeight: 600, fontSize: 14,
+                      border: 'none', cursor: revSending || !revRating ? 'not-allowed' : 'pointer',
+                      opacity: revSending || !revRating ? 0.6 : 1,
+                    }}>
+                      {revSending
+                        ? (lang === 'kk' ? 'Жіберілуде...' : 'Отправка...')
+                        : (lang === 'kk' ? 'Пікір жіберу' : 'Отправить отзыв')}
+                    </button>
+                  </form>
+                </div>
+              )}
 
-        {/* ── INSTRUCTOR ── */}
-        {tab === 'instructor' && course.instructor && (
-          <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '28px 32px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20, marginBottom: 24, flexWrap: 'wrap' }}>
-              <div style={{
-                width: 80, height: 80, borderRadius: 16, flexShrink: 0,
-                background: 'linear-gradient(135deg, #1E3A8A, #3B82F6)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#fff', fontWeight: 800, fontSize: 28,
-              }}>
-                {course.instructor.full_name?.[0] ?? '?'}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#111827', marginBottom: 4 }}>
-                  {course.instructor.full_name}
+              {revSent && (
+                <div style={{ background: '#F0FDF4', border: '1px solid #D1FAE5', borderRadius: 12, padding: '14px 18px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5"><path d="m4 12 5 5L20 6"/></svg>
+                  <span className="b-sm" style={{ fontWeight: 600, color: '#059669' }}>
+                    {lang === 'kk' ? 'Пікіріңіз жіберілді!' : 'Отзыв отправлен!'}
+                  </span>
                 </div>
-                <div style={{ fontSize: 14, color: '#6B7280', marginBottom: 16 }}>
-                  {lang === 'kk' ? 'Спикер' : lang === 'en' ? 'Instructor' : 'Спикер'}
+              )}
+
+              {reviews.length === 0 ? (
+                <div className="card" style={{ padding: '48px 20px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.25 }}>⭐</div>
+                  <div className="b-sm" style={{ color: 'var(--b-text-3)' }}>
+                    {lang === 'kk' ? 'Пікір жоқ' : lang === 'en' ? 'No reviews yet' : 'Отзывов пока нет'}
+                  </div>
                 </div>
-                <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap' }}>
-                  {[
-                    { n: course.rating.toFixed(1), l: lang === 'kk' ? 'рейтинг' : 'рейтинг' },
-                    { n: course.students_count.toLocaleString('ru-RU'), l: lang === 'kk' ? 'студент' : 'студентов' },
-                    { n: String(sections.length), l: lang === 'kk' ? 'модуль' : 'модулей' },
-                  ].map(({ n, l }) => (
-                    <div key={l}>
-                      <div style={{ fontSize: 20, fontWeight: 700, color: '#111827' }}>{n}</div>
-                      <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{l}</div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  {reviews.slice(0, 4).map(rev => (
+                    <div key={rev.id} className="card" style={{ padding: 20 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                        <div style={{
+                          width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                          background: 'var(--b-primary)', color: '#fff',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontWeight: 700, fontSize: 14,
+                        }}>
+                          {rev.student_id.slice(0, 1).toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="b-sm" style={{ fontWeight: 600 }}>{rev.student_id.slice(0, 8)}…</div>
+                          <Stars value={rev.rating} showNum={false} size={11} />
+                        </div>
+                      </div>
+                      {rev.comment && (
+                        <p className="b-sm" style={{ color: 'var(--b-text-2)' }}>«{rev.comment}»</p>
+                      )}
+                      <div className="b-xs" style={{ color: 'var(--b-text-4)', marginTop: 8 }}>
+                        {new Date(rev.created_at).toLocaleDateString(
+                          lang === 'kk' ? 'kk-KZ' : lang === 'ru' ? 'ru-RU' : 'en-US'
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
-              </div>
+              )}
             </div>
-            {course.instructor.bio && (
-              <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.7 }}>{course.instructor.bio}</p>
-            )}
           </div>
-        )}
 
-        {/* ── REVIEWS ── */}
-        {tab === 'reviews' && (
-          <div>
-            {/* Summary */}
-            <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '20px 24px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 20 }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 52, fontWeight: 800, lineHeight: 1, color: '#111827' }}>
-                  {course.rating.toFixed(1)}
-                </div>
-                <Stars value={course.rating} size={18} />
-                <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 4 }}>
-                  {reviews.length} {lang === 'kk' ? 'пікір' : 'отзывов'}
-                </div>
-              </div>
-            </div>
+          {/* ── RIGHT: sticky purchase card ── */}
+          <aside style={{ position: 'sticky', top: 88 }}>
+            <div className="card card-elevated" style={{ padding: 24 }}>
 
-            {/* Review form */}
-            {enrolled && !alreadyReviewed && !revSent && (
-              <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: 24, marginBottom: 20 }}>
-                <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, color: '#111827' }}>
-                  {lang === 'kk' ? 'Пікір жазу' : lang === 'en' ? 'Write a review' : 'Написать отзыв'}
+              {/* Price */}
+              {course.price === 0 ? (
+                <div className="b-h1" style={{ fontSize: 36, color: 'var(--b-success)', marginBottom: 18 }}>
+                  {lang === 'kk' ? 'Тегін' : lang === 'en' ? 'Free' : 'Бесплатно'}
                 </div>
-                <form onSubmit={submitReview} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  <div style={{ display: 'flex', gap: 4 }}>
-                    {[1,2,3,4,5].map(s => (
-                      <button key={s} type="button"
-                        onMouseEnter={() => setRevHover(s)} onMouseLeave={() => setRevHover(0)}
-                        onClick={() => setRevRating(s)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
-                        <svg width="28" height="28" viewBox="0 0 24 24"
-                          fill={(revHover || revRating) >= s ? '#F59E0B' : 'none'} stroke="#F59E0B" strokeWidth="1.5">
-                          <path d="M12 2 14.6 8.6 22 9.5l-5.5 4.8L18 22l-6-3.4L6 22l1.5-7.7L2 9.5l7.4-.9z"/>
-                        </svg>
-                      </button>
-                    ))}
+              ) : (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 6 }}>
+                    <span className="b-h1" style={{ fontSize: 36 }}>
+                      {(course.discount_price ?? course.price).toLocaleString('ru-RU')} ₸
+                    </span>
+                    {course.discount_price && (
+                      <span style={{ color: 'var(--b-text-4)', textDecoration: 'line-through' }}>
+                        {course.price.toLocaleString('ru-RU')} ₸
+                      </span>
+                    )}
                   </div>
-                  <textarea className="inp w-full" rows={3}
-                    value={revText} onChange={e => setRevText(e.target.value)}
-                    placeholder={lang === 'kk' ? 'Курс туралы пікіріңіз...' : 'Ваши впечатления...'}
-                    style={{ resize: 'vertical' }} />
-                  {revError && (
-                    <div style={{ fontSize: 13, padding: '10px 14px', borderRadius: 8, background: '#FEE2E2', color: '#DC2626' }}>
-                      {revError}
+                  {discPct > 0 && course.discount_price && timer > 0 && (
+                    <div className="chip chip-accent" style={{ marginBottom: 20, display: 'inline-flex' }}>
+                      −{discPct}% · {lang === 'kk' ? 'Жеңілдік аяқталады' : lang === 'en' ? 'Offer ends in' : 'Скидка действует ещё'}{' '}
+                      {p2(Math.floor(timer / 3600))}:{p2(Math.floor((timer % 3600) / 60))}:{p2(timer % 60)}
                     </div>
                   )}
-                  <button type="submit" disabled={revSending || !revRating} style={{
-                    alignSelf: 'flex-start', padding: '10px 20px', borderRadius: 8,
-                    background: '#1E3A8A', color: '#fff', fontWeight: 600, fontSize: 14,
-                    border: 'none', cursor: revSending || !revRating ? 'not-allowed' : 'pointer',
-                    opacity: revSending || !revRating ? 0.6 : 1,
-                  }}>
-                    {revSending ? (lang === 'kk' ? 'Жіберілуде...' : 'Отправка...') : (lang === 'kk' ? 'Пікір жіберу' : 'Отправить отзыв')}
+                </>
+              )}
+
+              {/* CTA */}
+              {enrolled ? (
+                <Link href={`/courses/${course.slug}/learn`} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  width: '100%', padding: '14px 0', borderRadius: 10,
+                  background: 'var(--b-primary)', color: '#fff',
+                  fontWeight: 700, fontSize: 15, textDecoration: 'none', marginBottom: 10,
+                }}>
+                  <Icon name="play" size={16} />
+                  {lang === 'kk' ? 'Жалғастыру' : lang === 'en' ? 'Continue learning' : 'Продолжить'}
+                </Link>
+              ) : (
+                <>
+                  <button onClick={enroll} disabled={enrolling} className="btn btn-primary btn-lg"
+                    style={{ width: '100%', marginBottom: 10, opacity: enrolling ? 0.7 : 1 }}>
+                    {enrolling
+                      ? (lang === 'kk' ? 'Жүктелуде...' : 'Загрузка...')
+                      : course.price > 0
+                        ? (lang === 'kk' ? 'Курсқа жазылу' : lang === 'en' ? 'Enroll now' : 'Записаться на курс')
+                        : (lang === 'kk' ? 'Тегін бастау' : lang === 'en' ? 'Start free' : 'Начать бесплатно')}
                   </button>
-                </form>
-              </div>
-            )}
+                  {course.price > 0 && (
+                    <button className="btn btn-secondary btn-lg" style={{ width: '100%', marginBottom: 16 }}>
+                      {lang === 'kk' ? 'Тегін көру' : lang === 'en' ? 'Try for free' : 'Попробовать бесплатно'}
+                    </button>
+                  )}
+                </>
+              )}
 
-            {revSent && (
-              <div style={{ background: '#F0FDF4', border: '1px solid #D1FAE5', borderRadius: 12, padding: '14px 18px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5"><path d="m4 12 5 5L20 6"/></svg>
-                <span style={{ fontSize: 14, fontWeight: 600, color: '#059669' }}>
-                  {lang === 'kk' ? 'Пікіріңіз жіберілді!' : 'Отзыв отправлен!'}
-                </span>
+              {/* Wishlist / Share */}
+              <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+                <button className="btn btn-ghost btn-sm" style={{ flex: 1 }}>
+                  <Icon name="heart" size={14} />
+                  {lang === 'kk' ? 'Сақтау' : lang === 'en' ? 'Save' : 'В избранное'}
+                </button>
+                <button className="btn btn-ghost btn-sm" style={{ flex: 1 }}>
+                  <Icon name="upload" size={14} />
+                  {lang === 'kk' ? 'Бөлісу' : lang === 'en' ? 'Share' : 'Поделиться'}
+                </button>
               </div>
-            )}
 
-            {reviews.length === 0 ? (
-              <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E5E7EB', padding: '48px 20px', textAlign: 'center' }}>
-                <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.25 }}>⭐</div>
-                <div style={{ fontSize: 14, color: '#9CA3AF' }}>
-                  {lang === 'kk' ? 'Пікір жоқ' : lang === 'en' ? 'No reviews yet' : 'Отзывов пока нет'}
-                </div>
-              </div>
-            ) : (
-              <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
-                {reviews.map(rev => (
-                  <div key={rev.id} style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', padding: 20 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-                      <div style={{
-                        width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-                        background: '#1E3A8A', color: '#fff',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontWeight: 700, fontSize: 14,
-                      }}>
-                        {rev.student_id.slice(0, 1).toUpperCase()}
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>
-                          {rev.student_id.slice(0, 8)}…
-                        </div>
-                        <Stars value={rev.rating} size={11} showNum={false} />
-                      </div>
-                    </div>
-                    {rev.comment && <p style={{ fontSize: 13, color: '#374151', lineHeight: 1.6 }}>«{rev.comment}»</p>}
-                    <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 8 }}>
-                      {new Date(rev.created_at).toLocaleDateString(lang === 'kk' ? 'kk-KZ' : lang === 'ru' ? 'ru-RU' : 'en-US')}
-                    </div>
+              {/* Features hairline */}
+              <div className="hairline">
+                {features.map((f, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 12, padding: '12px 0', alignItems: 'center' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--b-success)" strokeWidth="2.5" style={{ flexShrink: 0 }}>
+                      <path d="m4 12 5 5L20 6"/>
+                    </svg>
+                    <span className="b-sm" style={{ color: 'var(--b-text-2)' }}>{f}</span>
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Guarantee */}
+            {course.price > 0 && (
+              <div style={{
+                marginTop: 16, padding: 16, background: 'var(--b-bg-soft)',
+                borderRadius: 12, display: 'flex', alignItems: 'center', gap: 12,
+              }}>
+                <Icon name="shield" size={20} style={{ color: 'var(--b-success)' }} />
+                <span className="b-xs" style={{ color: 'var(--b-text-2)' }}>
+                  {lang === 'kk' ? '14 күн — сұраусыз ақша қайтару' : lang === 'en' ? '14-day money-back guarantee' : '14 дней — возврат денег без вопросов'}
+                </span>
+              </div>
             )}
-          </div>
-        )}
+          </aside>
+        </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════
-          MOBILE STICKY BAR
-      ═══════════════════════════════════════════════ */}
+      {/* Mobile sticky bar */}
       <div className="cd-mob-bar" style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
         padding: '12px 16px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
-        background: '#fff', borderTop: '1px solid #E5E7EB',
+        background: 'var(--b-bg)', borderTop: '1px solid var(--b-line)',
         alignItems: 'center', gap: 14, zIndex: 30,
       }}>
         <div>
-          <div style={{ fontSize: 11, color: '#9CA3AF' }}>
+          <div className="b-xs" style={{ color: 'var(--b-text-4)' }}>
             {lang === 'kk' ? 'бастап' : lang === 'en' ? 'from' : 'от'}
           </div>
-          <div style={{ fontSize: 20, fontWeight: 800, color: '#111827', lineHeight: 1.1 }}>
+          <div className="b-h2" style={{ fontSize: 20 }}>
             {course.price === 0
-              ? t.common.free
-              : `${(course.discount_price ?? course.price).toLocaleString('ru-RU')} ${t.common.currency}`}
+              ? (lang === 'kk' ? 'Тегін' : 'Бесплатно')
+              : `${(course.discount_price ?? course.price).toLocaleString('ru-RU')} ₸`}
           </div>
         </div>
         {enrolled ? (
           <Link href={`/courses/${course.slug}/learn`} style={{
             flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            padding: '13px 0', borderRadius: 10, background: '#1E3A8A', color: '#fff',
+            padding: '13px 0', borderRadius: 10, background: 'var(--b-primary)', color: '#fff',
             fontWeight: 700, fontSize: 15, textDecoration: 'none',
           }}>
             <Icon name="play" size={16} />
@@ -766,16 +596,28 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
           </Link>
         ) : (
           <button onClick={enroll} disabled={enrolling} style={{
-            flex: 1, padding: '13px 0', borderRadius: 10, background: '#1E3A8A',
+            flex: 1, padding: '13px 0', borderRadius: 10, background: 'var(--b-primary)',
             color: '#fff', fontWeight: 700, fontSize: 15, border: 'none',
             cursor: enrolling ? 'not-allowed' : 'pointer', opacity: enrolling ? 0.7 : 1,
           }}>
-            {enrolling ? t.common.loading : course.price > 0
+            {enrolling ? '...' : course.price > 0
               ? (lang === 'kk' ? 'Сатып алу' : 'Купить')
-              : t.course.enroll}
+              : (lang === 'kk' ? 'Тегін бастау' : 'Начать')}
           </button>
         )}
       </div>
+
+      <style>{`
+        @media (max-width: 959px) {
+          .cd-grid { grid-template-columns: 1fr !important; }
+          .cd-grid aside { display: none; }
+          .cd-mob-bar { display: flex !important; }
+        }
+        @media (min-width: 960px) {
+          .cd-mob-bar { display: none !important; }
+        }
+        .cd-mob-bar { display: none; }
+      `}</style>
     </div>
   )
 }
