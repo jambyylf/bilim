@@ -266,20 +266,14 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
       style={{ position: 'absolute', inset: 0, background: '#000', overflow: 'hidden', userSelect: 'none' }}
       onContextMenu={e => e.preventDefault()}
     >
-      {/* YouTube iframe — zoom жоқ, өз өлшемінде */}
-      <div ref={ytRef} style={{ position: 'absolute', inset: 0 }} />
+      {/* YouTube iframe — 5% артық, overflow:hidden кесіп тастайды → YouTube chrome жасырылады */}
+      <div ref={ytRef} style={{ position: 'absolute', top: '-5%', left: '-5%', right: '-5%', bottom: '-5%' }} />
 
       {/* Click/hover блокатор — YouTube hover UI шықпасын */}
       <div
         style={{ position: 'absolute', inset: 0, zIndex: 5 }}
         onClick={ready ? () => { closeMenus(); togglePlay() } : undefined}
       />
-
-      {/* YouTube native UI жабатын solid қара жолақ — controls астында */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        height: 120, background: '#000', zIndex: 9, pointerEvents: 'none',
-      }} />
 
       {/* Жүктелуде */}
       {!ready && !error && (
