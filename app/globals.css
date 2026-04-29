@@ -699,3 +699,34 @@ html {
   .b-h2      { font-size: 22px; }
   .b-h3      { font-size: 18px; }
 }
+
+/* ══════════════════════════════════════════════════
+   Видео плеер — адаптивті лайаут
+   ══════════════════════════════════════════════════ */
+/* Mobile: flex-col, video 16:9 */
+.player-col {
+  display: flex;
+  flex-direction: column;
+}
+.player-video {
+  width: 100%;
+  aspect-ratio: 16/9;
+  min-height: 180px;
+  overflow: hidden;
+}
+
+/* Desktop: grid 1fr auto — video fills remaining height */
+@media (min-width: 768px) {
+  .player-col {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .player-video {
+    aspect-ratio: unset;
+    min-height: 0;
+    overflow: hidden;
+  }
+}

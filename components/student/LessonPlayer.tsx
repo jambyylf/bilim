@@ -262,7 +262,9 @@ export default function LessonPlayer({
   )
 
   return (
-    <div style={{ width: '100%', height: '100vh', background: '#0a0e1a', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ width: '100%', background: '#0a0e1a', display: 'flex', flexDirection: 'column' }}
+      className="min-h-screen md:h-screen md:overflow-hidden"
+    >
 
       {/* ── Header ── */}
       <header style={{
@@ -326,13 +328,14 @@ export default function LessonPlayer({
       </header>
 
       {/* ── Main area ── */}
-      <div className="flex-1 flex min-h-0 overflow-hidden">
+      <div className="flex flex-col md:flex-row md:flex-1 md:min-h-0 md:overflow-hidden">
 
-        {/* LEFT: player column — grid: video fills 1fr, toolbar auto */}
-        <div style={{ flex: 1, display: 'grid', gridTemplateRows: '1fr auto', minHeight: 0, overflow: 'hidden' }}>
+        {/* LEFT: player column */}
+        {/* Mobile: flex-col (scroll), Desktop: grid 1fr auto (fixed height) */}
+        <div className="flex flex-col flex-1 md:min-h-0 md:overflow-hidden player-col">
 
-          {/* Video — fills all available height */}
-          <div style={{ background: '#000', position: 'relative', minHeight: 0, overflow: 'hidden' }}>
+          {/* Video — mobile: 16:9 natural, desktop: fills available space */}
+          <div className="player-video" style={{ background: '#000', position: 'relative' }}>
             {currentLesson?.has_video ? (
               <YouTubeSecurePlayer
                 lessonId={currentLesson.id}
@@ -421,10 +424,10 @@ export default function LessonPlayer({
 
         </div>
 
-        {/* RIGHT: sidebar (desktop) */}
+        {/* RIGHT: sidebar (desktop only) */}
         <aside
           className="hidden md:flex flex-col"
-          style={{ width: 360, background: '#0f172a', borderLeft: '1px solid rgba(255,255,255,0.08)', minHeight: 0, overflow: 'hidden' }}
+          style={{ width: 360, flexShrink: 0, background: '#0f172a', borderLeft: '1px solid rgba(255,255,255,0.08)', minHeight: 0, overflow: 'hidden' }}
         >
           {sidebarContent}
         </aside>
@@ -442,8 +445,8 @@ export default function LessonPlayer({
       <aside
         className="md:hidden flex flex-col"
         style={{
-          position: 'fixed', top: 56, right: 0, bottom: 0, zIndex: 200,
-          width: Math.min(360, typeof window !== 'undefined' ? window.innerWidth * 0.85 : 300),
+          position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 200,
+          width: '85vw', maxWidth: 360,
           background: '#0f172a', borderLeft: '1px solid rgba(255,255,255,0.08)',
           transform: mobileSidebarOpen ? 'translateX(0)' : 'translateX(100%)',
           transition: 'transform 0.28s cubic-bezier(0.4,0,0.2,1)',
