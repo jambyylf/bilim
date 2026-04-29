@@ -132,7 +132,6 @@ export default function HomeContent({ user }: HomeContentProps) {
               </div>
 
             </div>
-          </div>
         </div>
       </section>
 
