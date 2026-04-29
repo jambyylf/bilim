@@ -360,23 +360,23 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
       />
 
-      {/* ── YouTube UI-ін жасыратын тұрақты overlay-лар ── */}
-      {/* Үстіңгі жолақ — share, info батырмаларын жасырады */}
+      {/* ── YouTube UI-ін толық жасыратын overlay-лар ── */}
+      {/* Үстіңгі қара жолақ */}
       <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: '13%',
-        background: 'linear-gradient(rgba(0,0,0,0.55), transparent)',
-        zIndex: 6, pointerEvents: 'none',
+        position: 'absolute', top: 0, left: 0, right: 0, height: 42,
+        background: '#0a0a0a',
+        zIndex: 8, pointerEvents: 'none',
       }} />
-      {/* Төменгі жолақ — YouTube логотипі мен end-screen элементтерін жасырады */}
+      {/* Төменгі қара жолақ — YouTube controls, logo, "Басқа бейнелер" жасырады */}
       <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0, height: '22%',
-        background: 'linear-gradient(transparent, rgba(0,0,0,0.85))',
-        zIndex: 6, pointerEvents: 'none',
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: 56,
+        background: '#0a0a0a',
+        zIndex: 8, pointerEvents: 'none',
       }} />
 
       {/* Click overlay — ойнату/тоқтату */}
       <div
-        style={{ position: 'absolute', inset: 0, zIndex: 7 }}
+        style={{ position: 'absolute', inset: 0, zIndex: 9 }}
         onClick={ready ? () => { closeMenus(); togglePlay() } : undefined}
       />
 
@@ -427,6 +427,7 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
         <div
           style={{
             position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 20,
+            background: 'linear-gradient(transparent, rgba(0,0,0,0.7) 40%, #0a0a0a)',
             padding: '48px 14px 10px',
             transition: 'opacity 0.25s ease',
             opacity: controlsVisible ? 1 : 0,
