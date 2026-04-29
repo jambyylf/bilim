@@ -8,10 +8,7 @@ import Icon from '@/components/shared/Icon'
 import NotificationBell from '@/components/layout/NotificationBell'
 import { useTheme } from '@/components/providers/ThemeProvider'
 import { useLang, type LangCode } from '@/components/providers/LangProvider'
-
-interface TopNavProps {
-  user?: { full_name: string | null; role: string } | null
-}
+import { useAuth } from '@/components/providers/AuthProvider'
 
 const LANG_LABELS: Record<LangCode, string> = { kk: 'ҚАЗ', ru: 'РУС', en: 'ENG' }
 const LANG_OPTIONS: { code: LangCode; label: string }[] = [
@@ -20,11 +17,12 @@ const LANG_OPTIONS: { code: LangCode; label: string }[] = [
   { code: 'en', label: 'English' },
 ]
 
-export default function TopNav({ user }: TopNavProps) {
+export default function TopNav() {
   const pathname  = usePathname()
   const router    = useRouter()
   const { theme, toggleTheme } = useTheme()
   const { lang, t, setLang }   = useLang()
+  const { user } = useAuth()
 
   const [langOpen,   setLangOpen]   = useState(false)
   const [searchQ,    setSearchQ]    = useState('')

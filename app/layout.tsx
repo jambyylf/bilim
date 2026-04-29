@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { LangProvider } from '@/components/providers/LangProvider'
+import { AuthProvider } from '@/components/providers/AuthProvider'
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
@@ -75,7 +76,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="antialiased" style={{ fontFamily: 'var(--font-inter, Inter, sans-serif)' }}>
         <ThemeProvider>
           <LangProvider>
-            {children}
+            <AuthProvider>
+              {children}
+            </AuthProvider>
           </LangProvider>
         </ThemeProvider>
       </body>
