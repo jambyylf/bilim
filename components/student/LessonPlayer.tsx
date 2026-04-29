@@ -236,6 +236,13 @@ export default function LessonPlayer({
             fontFamily: 'inherit', resize: 'none', outline: 'none',
           }}
         />
+        <button
+          className="btn btn-accent btn-sm"
+          style={{ width: '100%', marginTop: 8, justifyContent: 'center' }}
+          onClick={() => { /* save note */ }}
+        >
+          {tx.save}
+        </button>
       </div>
     </>
   )
@@ -257,7 +264,7 @@ export default function LessonPlayer({
           >
             <Icon name="chevronLeft" size={18} />
           </Link>
-          <Logo size={24} />
+          <Logo color="var(--b-accent)" textColor="#fff" size={24} />
           <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.15)', flexShrink: 0 }} />
           <div style={{ minWidth: 0 }}>
             {currentSection && (
@@ -295,9 +302,9 @@ export default function LessonPlayer({
             <Icon name="settings" size={17} />
           </button>
           <button
-            className="md:hidden"
+            className="md:hidden flex items-center"
             onClick={() => setMobileSidebarOpen(v => !v)}
-            style={{ color: '#fff', background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+            style={{ color: '#fff', background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer' }}
           >
             <Icon name="book" size={16} />
           </button>
@@ -329,24 +336,24 @@ export default function LessonPlayer({
 
           {/* ── Below-player toolbar ── */}
           <div style={{
-            padding: '0 16px', background: '#0f172a',
+            padding: '12px 24px', background: '#0f172a',
             borderTop: '1px solid rgba(255,255,255,0.06)',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            flexShrink: 0, gap: 8, flexWrap: 'wrap', minHeight: 56,
+            flexShrink: 0, gap: 8, flexWrap: 'wrap',
           }}>
 
-            {/* Tabs (underline style) */}
-            <div style={{ display: 'flex', gap: 0, alignSelf: 'stretch' }}>
+            {/* Tabs (button style) */}
+            <div style={{ display: 'flex', gap: 4 }}>
               {(['notes', 'resources', 'questions'] as const).map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   style={{
-                    padding: '0 14px', fontSize: 13, fontWeight: activeTab === tab ? 600 : 400,
-                    cursor: 'pointer', border: 'none', outline: 'none', background: 'transparent',
-                    color: activeTab === tab ? '#fff' : 'rgba(255,255,255,0.45)',
-                    borderBottom: activeTab === tab ? '2px solid #fff' : '2px solid transparent',
-                    borderRadius: 0, transition: 'color 0.15s, border-color 0.15s',
+                    padding: '6px 12px', fontSize: 13, fontWeight: activeTab === tab ? 600 : 400,
+                    cursor: 'pointer', border: 'none', outline: 'none', borderRadius: 6,
+                    background: activeTab === tab ? 'rgba(255,255,255,0.08)' : 'transparent',
+                    color: activeTab === tab ? '#fff' : 'rgba(255,255,255,0.5)',
+                    transition: 'background 0.15s, color 0.15s',
                     whiteSpace: 'nowrap',
                   }}
                 >
@@ -356,7 +363,7 @@ export default function LessonPlayer({
             </div>
 
             {/* Nav buttons */}
-            <div style={{ display: 'flex', gap: 6, alignItems: 'center', paddingTop: 8, paddingBottom: 8 }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <button
                 onClick={() => prevLesson && goLesson(prevLesson.id)}
                 disabled={!prevLesson}
@@ -364,9 +371,9 @@ export default function LessonPlayer({
                   display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px',
                   borderRadius: 8, fontSize: 13, fontWeight: 500,
                   cursor: prevLesson ? 'pointer' : 'not-allowed',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  background: 'rgba(255,255,255,0.05)',
-                  color: prevLesson ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.25)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  background: 'rgba(255,255,255,0.08)',
+                  color: prevLesson ? '#fff' : 'rgba(255,255,255,0.25)',
                 }}
               >
                 <Icon name="chevronLeft" size={13} /> {tx.prev}
@@ -375,13 +382,8 @@ export default function LessonPlayer({
               {!completedIds.has(activeId) && (
                 <button
                   onClick={() => currentLesson && saveProgress(currentLesson.id, currentTime, true)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px',
-                    borderRadius: 8, fontSize: 13, fontWeight: 600,
-                    cursor: 'pointer', border: 'none',
-                    background: 'rgba(13,148,136,0.15)',
-                    color: '#0D9488',
-                  }}
+                  className="btn btn-accent btn-sm"
+                  style={{ display: 'flex', alignItems: 'center', gap: 5 }}
                 >
                   <Icon name="check" size={13} />
                   <span className="hidden sm:inline">{tx.mark}</span>
@@ -391,37 +393,23 @@ export default function LessonPlayer({
               <button
                 onClick={() => nextLesson && goLesson(nextLesson.id)}
                 disabled={!nextLesson}
+                className="btn btn-primary btn-sm"
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px',
-                  borderRadius: 8, fontSize: 13, fontWeight: 600,
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  opacity: nextLesson ? 1 : 0.35,
                   cursor: nextLesson ? 'pointer' : 'not-allowed',
-                  border: 'none',
-                  background: nextLesson ? '#1E3A8A' : 'rgba(30,58,138,0.2)',
-                  color: '#fff',
                 }}
               >
                 {tx.next} <Icon name="chevronLeft" size={13} style={{ transform: 'rotate(180deg)' }} />
               </button>
             </div>
-
-            {/* Save note button (right side) */}
-            <button
-              onClick={() => { /* TODO: save note to DB */ }}
-              style={{
-                padding: '8px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-                cursor: 'pointer', border: 'none', background: '#F59E0B', color: '#000',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {tx.save}
-            </button>
           </div>
         </div>
 
         {/* RIGHT: sidebar (desktop) */}
         <aside
           className="hidden md:flex flex-col"
-          style={{ width: 320, background: '#0f172a', borderLeft: '1px solid rgba(255,255,255,0.08)', minHeight: 0, overflow: 'hidden' }}
+          style={{ width: 360, background: '#0f172a', borderLeft: '1px solid rgba(255,255,255,0.08)', minHeight: 0, overflow: 'hidden' }}
         >
           {sidebarContent}
         </aside>
@@ -437,12 +425,11 @@ export default function LessonPlayer({
 
       {/* Mobile drawer */}
       <aside
-        className="md:hidden"
+        className="md:hidden flex flex-col"
         style={{
           position: 'fixed', top: 56, right: 0, bottom: 0, zIndex: 200,
-          width: Math.min(320, typeof window !== 'undefined' ? window.innerWidth * 0.85 : 300),
+          width: Math.min(360, typeof window !== 'undefined' ? window.innerWidth * 0.85 : 300),
           background: '#0f172a', borderLeft: '1px solid rgba(255,255,255,0.08)',
-          display: 'flex', flexDirection: 'column',
           transform: mobileSidebarOpen ? 'translateX(0)' : 'translateX(100%)',
           transition: 'transform 0.28s cubic-bezier(0.4,0,0.2,1)',
         }}
