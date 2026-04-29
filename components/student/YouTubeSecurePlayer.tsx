@@ -35,7 +35,6 @@ function fmtTime(sec: number) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 }
 
-// Иконкалар
 const Ico = {
   Play: () => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
@@ -104,11 +103,13 @@ interface Props {
 }
 
 export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTimeUpdate }: Props) {
-  const wrapRef = useRef<HTMLDivElement>(null)
+  // outerRef — React children бар сыртқы контейнер (React басқарады)
+  const outerRef = useRef<HTMLDivElement>(null)
+  // ytRef — тек YouTube iframe үшін, React тимейді
+  const ytRef = useRef<HTMLDivElement>(null)
   const playerRef = useRef<any>(null)
   const timerRef = useRef<ReturnType<typeof setInterval>>()
   const hideRef = useRef<ReturnType<typeof setTimeout>>()
-  // ref арқылы callback-тарды fresh ұстаймыз
   const onEndedRef = useRef(onEnded)
   const onTimeUpdateRef = useRef(onTimeUpdate)
   useEffect(() => { onEndedRef.current = onEnded }, [onEnded])
@@ -127,7 +128,6 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
   const [isFs, setIsFs] = useState(false)
   const [buffering, setBuffering] = useState(false)
 
-  // Fullscreen өзгерісін бақылау
   useEffect(() => {
     const fn = () => setIsFs(!!document.fullscreenElement)
     document.addEventListener('fullscreenchange', fn)
@@ -149,14 +149,13 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
     return () => clearInterval(timerRef.current)
   }, [ready])
 
-  // Controls auto-hide
   const resetHide = useCallback(() => {
     setShowControls(true)
     clearTimeout(hideRef.current)
     hideRef.current = setTimeout(() => setShowControls(false), 3000)
   }, [])
 
-  // Плеер инициализациясы (сабақ ауысқан сайын)
+  // Плеер инициализациясы
   useEffect(() => {
     let alive = true
     setReady(false)
@@ -168,7 +167,7 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
     setSpeed(1)
 
     async function init() {
-      // 1. Сервердан video ID алу (auth тексеріледі)
+      // 1. Auth тексеріліп, video ID алынады
       let videoId: string
       try {
         const r = await fetch(`/api/student/lesson-video/${lessonId}`)
@@ -188,25 +187,27 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
       await ensureYTApi()
       if (!alive) return
 
-      // 3. Контейнерге жаңа iframe орнату
+      // 3. Тек ytRef контейнерін тазалап, жаңа iframe орнатамыз
+      //    (outerRef-ке тимейміз — React элементтері сол жерде)
       try { playerRef.current?.destroy() } catch {}
-      const wrap = wrapRef.current
-      if (!wrap || !alive) return
-      wrap.innerHTML = ''
+      const ytContainer = ytRef.current
+      if (!ytContainer || !alive) return
+
+      // ytRef ішіндегі ескі iframe-ды тазалаймыз
+      ytContainer.innerHTML = ''
       const el = document.createElement('div')
-      el.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none'
-      wrap.appendChild(el)
+      ytContainer.appendChild(el)
 
       playerRef.current = new window.YT.Player(el, {
         videoId,
         width: '100%',
         height: '100%',
         playerVars: {
-          controls: 0,        // YouTube controls жасырылады
+          controls: 0,
           modestbranding: 1,
           rel: 0,
           iv_load_policy: 3,
-          disablekb: 1,       // YouTube пернетақтасы өшірілген
+          disablekb: 1,
           playsinline: 1,
           enablejsapi: 1,
           origin: window.location.origin,
@@ -222,7 +223,6 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
           },
           onStateChange(e: any) {
             if (!alive) return
-            // 0=аяқталды 1=ойнап тұр 2=тоқтады 3=буферленуде
             setPlaying(e.data === 1)
             setBuffering(e.data === 3)
             if (e.data === 1) {
@@ -246,11 +246,11 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
       clearTimeout(hideRef.current)
       try { playerRef.current?.destroy() } catch {}
       playerRef.current = null
-      if (wrapRef.current) wrapRef.current.innerHTML = ''
+      // ytRef-ті тазалаймыз (outerRef-ке тимейміз)
+      if (ytRef.current) ytRef.current.innerHTML = ''
     }
   }, [lessonId])
 
-  // Controls handlers
   function togglePlay() {
     if (!playerRef.current) return
     if (playing) { playerRef.current.pauseVideo(); setPlaying(false) }
@@ -267,14 +267,8 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
   function handleVolume(e: React.ChangeEvent<HTMLInputElement>) {
     const v = Number(e.target.value)
     setVolume(v)
-    if (v === 0) {
-      playerRef.current?.mute()
-      setMuted(true)
-    } else {
-      playerRef.current?.unMute()
-      playerRef.current?.setVolume(v)
-      setMuted(false)
-    }
+    if (v === 0) { playerRef.current?.mute(); setMuted(true) }
+    else { playerRef.current?.unMute(); playerRef.current?.setVolume(v); setMuted(false) }
   }
 
   function toggleMute() {
@@ -295,7 +289,7 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
   }
 
   function toggleFs() {
-    const el = wrapRef.current
+    const el = outerRef.current
     if (!el) return
     if (!document.fullscreenElement) el.requestFullscreen?.().catch(() => {})
     else document.exitFullscreen?.().catch(() => {})
@@ -305,7 +299,7 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
 
   return (
     <div
-      ref={wrapRef}
+      ref={outerRef}
       style={{
         position: 'relative',
         width: '100%',
@@ -319,9 +313,13 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
       onMouseLeave={() => playing && setShowControls(false)}
       onContextMenu={e => e.preventDefault()}
     >
-      {/* YouTube iframe мұнда JS арқылы қосылады (React рендермейді) */}
+      {/* YouTube iframe контейнері — React тимейді, тек JS басқарады */}
+      <div
+        ref={ytRef}
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+      />
 
-      {/* Барлық click-ті ұстайтын overlay */}
+      {/* Click overlay */}
       <div
         style={{ position: 'absolute', inset: 0, zIndex: 5 }}
         onClick={ready ? togglePlay : undefined}
@@ -334,7 +332,7 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
         </div>
       )}
 
-      {/* Буферлену индикаторы */}
+      {/* Буферлену */}
       {ready && buffering && (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, pointerEvents: 'none', color: '#fff' }}>
           <Ico.Spin />
@@ -348,7 +346,7 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
         </div>
       )}
 
-      {/* Кастомды Controls панелі */}
+      {/* Кастомды controls */}
       {ready && (
         <div
           style={{
@@ -377,7 +375,6 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
             style={{ width: '100%', marginBottom: 10, cursor: 'pointer', accentColor: '#F59E0B' }}
           />
 
-          {/* Батырмалар қатары */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#fff' }}>
             {/* Ойнату/Тоқтату */}
             <button onClick={togglePlay} style={btnStyle}>
