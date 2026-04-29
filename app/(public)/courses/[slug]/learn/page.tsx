@@ -11,13 +11,14 @@ export default async function LearnPage({
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const slug = decodeURIComponent(params.slug)
 
-  if (!user) redirect(`/login?redirect=/courses/${params.slug}/learn`)
+  if (!user) redirect(`/login?redirect=/courses/${slug}/learn`)
 
   const { data: course } = await supabase
     .from('courses')
     .select('id, slug, title_kk, title_ru, title_en, status')
-    .eq('slug', params.slug)
+    .eq('slug', slug)
     .single()
 
   if (!course || course.status !== 'published') notFound()
@@ -37,14 +38,36 @@ export default async function LearnPage({
     .from('sections')
     .select(`
       id, title_kk, title_ru, title_en, order_idx,
-      lessons(id, title_kk, title_ru, title_en, mux_asset_id, mux_playback_id, duration_sec, order_idx, is_preview)
+      lessons(id, title_kk, title_ru, title_en, youtube_url, duration_sec, order_idx, is_preview)
     `)
     .eq('course_id', course.id)
     .order('order_idx')
 
+  // youtube_url клиентке бермейміз — has_video boolean-ға айналдырамыз
+  function mapLesson(l: any) {
+    return {
+      id: l.id,
+      title_kk: l.title_kk,
+      title_ru: l.title_ru,
+      title_en: l.title_en,
+      has_video: !!(l.youtube_url),
+      duration_sec: l.duration_sec,
+      order_idx: l.order_idx,
+      is_preview: l.is_preview,
+    }
+  }
+
   const rawSections = (sections as any[]) ?? []
-  const allLessons = rawSections.flatMap((s: any) =>
-    ((s.lessons ?? []) as any[]).sort((a: any, b: any) => a.order_idx - b.order_idx)
+  const cleanSections = rawSections.map((s: any) => ({
+    id: s.id,
+    title_kk: s.title_kk,
+    title_ru: s.title_ru,
+    title_en: s.title_en,
+    order_idx: s.order_idx,
+    lessons: ((s.lessons ?? []) as any[]).map(mapLesson),
+  }))
+  const allLessons = cleanSections.flatMap(s =>
+    [...s.lessons].sort((a, b) => a.order_idx - b.order_idx)
   )
 
   // Прогресс
@@ -59,7 +82,7 @@ export default async function LearnPage({
   return (
     <LessonPlayer
       course={course as any}
-      sections={rawSections}
+      sections={cleanSections}
       allLessons={allLessons}
       currentLessonId={currentLessonId}
       enrollmentId={enrollment.id}

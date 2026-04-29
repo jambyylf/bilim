@@ -3,17 +3,16 @@
 import { useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import MuxPlayer from '@mux/mux-player-react'
 import Icon from '@/components/shared/Icon'
 import Logo from '@/components/shared/Logo'
 import { useLang } from '@/components/providers/LangProvider'
 import { createClient } from '@/lib/supabase/client'
+import YouTubeSecurePlayer from '@/components/student/YouTubeSecurePlayer'
 
 interface Lesson {
   id: string
   title_kk: string; title_ru: string; title_en: string
-  mux_asset_id: string | null
-  mux_playback_id: string | null
+  has_video: boolean
   duration_sec: number
   order_idx: number
   is_preview: boolean
@@ -89,11 +88,10 @@ export default function LessonPlayer({ course, sections, allLessons, currentLess
     }
   }, [completedIds, allLessons.length])
 
-  function handleTimeUpdate(e: Event) {
-    const player = e.target as HTMLVideoElement
+  function handleTimeUpdate(time: number) {
     clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(() => {
-      if (currentLesson) saveProgress(currentLesson.id, player.currentTime, false)
+      if (currentLesson) saveProgress(currentLesson.id, time, false)
     }, 5000)
   }
 
@@ -240,24 +238,19 @@ export default function LessonPlayer({ course, sections, allLessons, currentLess
 
         {/* Плеер + мазмұн */}
         <main className="flex-1 overflow-y-auto">
-          {currentLesson?.mux_playback_id ? (
-            <MuxPlayer
-              playbackId={currentLesson.mux_playback_id}
-              streamType="on-demand"
-              style={{ width: '100%', aspectRatio: '16/9', display: 'block', background: '#000' }}
-              onTimeUpdate={handleTimeUpdate as any}
-              onEnded={handleEnded}
+          {currentLesson?.has_video ? (
+            <YouTubeSecurePlayer
+              lessonId={currentLesson.id}
               autoPlay
+              onEnded={handleEnded}
+              onTimeUpdate={handleTimeUpdate}
             />
           ) : (
-            <div
-              className="flex items-center justify-center"
-              style={{ aspectRatio: '16/9', background: '#0f0f0f' }}
-            >
+            <div className="flex items-center justify-center" style={{ aspectRatio: '16/9', background: '#0f0f0f' }}>
               <div className="text-center text-white">
                 <Icon name="video" size={48} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
                 <div className="b-body" style={{ opacity: 0.5 }}>
-                  {lang === 'kk' ? 'Видео жүктелуде…' : lang === 'en' ? 'Video processing…' : 'Видео обрабатывается…'}
+                  {lang === 'kk' ? 'Видео жоқ' : lang === 'en' ? 'No video' : 'Видео отсутствует'}
                 </div>
               </div>
             </div>
