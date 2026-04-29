@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
 
 interface AuthUser {
   id: string
@@ -27,29 +28,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = createClient()
 
   useEffect(() => {
-    // Бастапқы сессияны алу
-    async function loadUser(userId: string) {
+    async function loadUser(sessionUser: User) {
       const { data: profile } = await supabase
         .from('profiles')
         .select('id, full_name, role, avatar_url')
-        .eq('id', userId)
+        .eq('id', sessionUser.id)
         .single()
-      setUser(profile ?? null)
+
+      if (profile) {
+        setUser(profile)
+        return
+      }
+
+      // Профиль жоқ (телефон немесе Google арқылы тіркелген) — жасаймыз
+      const displayName =
+        sessionUser.user_metadata?.full_name ??
+        sessionUser.user_metadata?.name ??
+        sessionUser.phone ??
+        sessionUser.email?.split('@')[0] ??
+        'Қолданушы'
+
+      const { data: newProfile } = await supabase
+        .from('profiles')
+        .upsert(
+          { id: sessionUser.id, full_name: displayName, role: 'student', lang_pref: 'ru' },
+          { onConflict: 'id', ignoreDuplicates: true }
+        )
+        .select('id, full_name, role, avatar_url')
+        .single()
+
+      setUser(newProfile ?? {
+        id: sessionUser.id,
+        full_name: displayName,
+        role: 'student',
+        avatar_url: null,
+      })
     }
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        loadUser(session.user.id).finally(() => setLoading(false))
+        loadUser(session.user).finally(() => setLoading(false))
       } else {
         setUser(null)
         setLoading(false)
       }
     })
 
-    // Auth күйінің өзгерісін тыңдау (login / logout)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        loadUser(session.user.id)
+        loadUser(session.user)
       } else {
         setUser(null)
       }
