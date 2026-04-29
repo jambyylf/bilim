@@ -207,6 +207,12 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
     }
   }, [lessonId])
 
+  function skip(sec: number) {
+    const t = Math.max(0, Math.min((playerRef.current?.getCurrentTime() || 0) + sec, duration))
+    playerRef.current?.seekTo(t, true)
+    setCurrent(t)
+  }
+
   function togglePlay() {
     if (!playerRef.current) return
     if (ended) {
@@ -269,6 +275,12 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
         onClick={ready ? () => { closeMenus(); togglePlay() } : undefined}
       />
 
+      {/* YouTube native UI жабатын solid қара жолақ — controls астында */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        height: 120, background: '#000', zIndex: 9, pointerEvents: 'none',
+      }} />
+
       {/* Жүктелуде */}
       {!ready && !error && (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, color: '#fff', background: '#000' }}>
@@ -307,7 +319,7 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
         <div
           style={{
             position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 20,
-            background: 'linear-gradient(transparent, rgba(0,0,0,0.82) 35%, rgba(0,0,0,0.96))',
+            background: 'linear-gradient(transparent, rgba(0,0,0,0.97) 25%, #000 45%)',
             padding: '40px 14px 10px',
           }}
           onClick={e => e.stopPropagation()}
@@ -323,6 +335,18 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#fff' }}>
             <button onClick={togglePlay} style={btn}>
               {playing ? <Ico.Pause /> : <Ico.Play />}
+            </button>
+
+            {/* Skip buttons */}
+            <button onClick={() => skip(-10)} style={{ ...btn, fontSize: 11, fontWeight: 700, gap: 1 }}
+              title="10 секунд артқа">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 5V1l-5 5 5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6h-2c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+              <span style={{ fontSize: 10 }}>10</span>
+            </button>
+            <button onClick={() => skip(10)} style={{ ...btn, fontSize: 11, fontWeight: 700, gap: 1 }}
+              title="10 секунд алға">
+              <span style={{ fontSize: 10 }}>10</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'scaleX(-1)' }}><path d="M11.99 5V1l-5 5 5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6h-2c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
             </button>
 
             <button onClick={toggleMute} style={btn}>

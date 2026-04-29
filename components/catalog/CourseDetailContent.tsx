@@ -137,17 +137,24 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
         </div>
       )}
 
-      <div className="mb-4">
+      <div className="mb-3">
         {course.price === 0 ? (
           <div className="b-display" style={{ color: 'var(--b-teal)' }}>{t.common.free}</div>
         ) : (
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-baseline gap-2 flex-wrap">
             <div className="b-display">{(course.discount_price ?? course.price).toLocaleString('ru-RU')} {t.common.currency}</div>
             {course.discount_price && (
               <div className="b-h4 line-through" style={{ color: 'var(--b-text-4)' }}>
                 {course.price.toLocaleString('ru-RU')} {t.common.currency}
               </div>
             )}
+          </div>
+        )}
+        {course.discount_price && (
+          <div className="chip chip-accent mt-2" style={{ display: 'inline-flex' }}>
+            −{Math.round((1 - course.discount_price / course.price) * 100)}%
+            {' · '}
+            {lang === 'kk' ? 'Жеңілдік' : lang === 'en' ? 'Discount' : 'Скидка'}
           </div>
         )}
       </div>
@@ -162,31 +169,46 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
           {lang === 'kk' ? 'Жалғастыру' : lang === 'en' ? 'Continue learning' : 'Продолжить'}
         </Link>
       ) : (
-        <button
-          className="btn btn-primary btn-fluid w-full mb-3"
-          onClick={handleEnroll}
-          disabled={enrolling}
-          style={{ minHeight: 48 }}
-        >
-          {enrolling ? t.common.loading : course.price > 0
-            ? (lang === 'kk' ? 'Сатып алу' : lang === 'en' ? 'Buy now' : 'Купить')
-            : t.course.enroll}
-        </button>
+        <>
+          <button
+            className="btn btn-primary btn-fluid w-full mb-2"
+            onClick={handleEnroll}
+            disabled={enrolling}
+            style={{ minHeight: 48 }}
+          >
+            {enrolling ? t.common.loading : course.price > 0
+              ? (lang === 'kk' ? 'Курсқа жазылу' : lang === 'en' ? 'Enroll now' : 'Записаться на курс')
+              : t.course.enroll}
+          </button>
+          {course.price > 0 && (
+            <button className="btn btn-secondary w-full mb-3" style={{ justifyContent: 'center', minHeight: 44 }}>
+              {lang === 'kk' ? 'Тегін көру' : lang === 'en' ? 'Try for free' : 'Попробовать бесплатно'}
+            </button>
+          )}
+        </>
       )}
 
-      <button className="btn btn-secondary w-full mb-4" style={{ justifyContent: 'center', minHeight: 44 }}>
-        <Icon name="heart" size={15} /> {t.course.addToWishlist}
-      </button>
+      <div className="flex gap-2 mb-5">
+        <button className="btn btn-ghost btn-sm flex-1" style={{ justifyContent: 'center', minHeight: 40 }}>
+          <Icon name="heart" size={14}/> {t.course.addToWishlist}
+        </button>
+        <button className="btn btn-ghost btn-sm flex-1" style={{ justifyContent: 'center', minHeight: 40 }}>
+          <Icon name="upload" size={14}/> {lang === 'kk' ? 'Бөлісу' : lang === 'en' ? 'Share' : 'Поделиться'}
+        </button>
+      </div>
 
-      <div className="flex flex-col gap-2 pt-4" style={{ borderTop: '1px solid var(--b-line)' }}>
+      {/* Features list */}
+      <div style={{ borderTop: '1px solid var(--b-line)', paddingTop: 16 }}>
         {[
-          [t.instructor.courseLanguage, t.instructor.languages[course.language as 'kk' | 'ru' | 'en']],
-          [t.instructor.courseLevel, t.instructor.levels[course.level as 'beginner' | 'intermediate' | 'advanced']],
-          [t.course.lessons, `${totalLessons}`],
-        ].map(([label, val]) => (
-          <div key={label} className="flex justify-between b-sm">
-            <span style={{ color: 'var(--b-text-3)' }}>{label}</span>
-            <span className="font-medium">{val}</span>
+          `${totalLessons} ${lang === 'kk' ? 'видео-сабақ' : lang === 'en' ? 'video lessons' : 'видео-урока'}`,
+          lang === 'kk' ? 'Аяқтаған соң сертификат' : lang === 'en' ? 'Certificate of completion' : 'Сертификат по окончании',
+          lang === 'kk' ? 'Мәңгілік қолжетімді' : lang === 'en' ? 'Lifetime access' : 'Доступ навсегда',
+          lang === 'kk' ? 'Ментор қолдауы' : lang === 'en' ? 'Mentor support' : 'Поддержка ментора',
+          `${t.instructor.languages[course.language as 'kk' | 'ru' | 'en']} · ${t.instructor.levels[course.level as 'beginner' | 'intermediate' | 'advanced']}`,
+        ].map((f, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--b-line-soft)' }}>
+            <Icon name="check" size={15} style={{ color: 'var(--b-success)', flexShrink: 0 }}/>
+            <span className="b-sm" style={{ color: 'var(--b-text-2)' }}>{f}</span>
           </div>
         ))}
       </div>
@@ -378,20 +400,32 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
         {/* ── СПИКЕР ── */}
         {activeTab === 'instructor' && course.instructor && (
           <div className="card p-6 md:p-8">
-            <div className="flex items-center gap-4 mb-5">
-              <div className="b-avatar" style={{ width: 64, height: 64, fontSize: 24, background: 'var(--b-primary)', color: '#fff' }}>
+            <div className="flex items-start gap-6 mb-6">
+              <div className="b-avatar shrink-0" style={{ width: 96, height: 96, fontSize: 32, background: 'linear-gradient(135deg, #1E3A8A, #3B82F6)', color: '#fff', borderRadius: 16 }}>
                 {course.instructor.full_name?.[0] ?? '?'}
               </div>
-              <div>
-                <div className="b-h2">{course.instructor.full_name}</div>
-                <div className="b-sm mt-1" style={{ color: 'var(--b-text-3)' }}>
+              <div className="flex-1">
+                <div className="b-h2 mb-1">{course.instructor.full_name}</div>
+                <div className="b-sm mb-4" style={{ color: 'var(--b-text-3)' }}>
                   {lang === 'kk' ? 'Спикер' : lang === 'en' ? 'Instructor' : 'Спикер'}
+                </div>
+                {course.instructor.bio && (
+                  <p className="b-body mb-5" style={{ color: 'var(--b-text-2)', lineHeight: 1.65 }}>{course.instructor.bio}</p>
+                )}
+                <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
+                  {[
+                    { n: course.rating.toFixed(1), label: lang === 'kk' ? 'рейтинг' : lang === 'en' ? 'rating' : 'рейтинг' },
+                    { n: course.students_count.toLocaleString('ru-RU'), label: lang === 'kk' ? 'студент' : lang === 'en' ? 'students' : 'студентов' },
+                    { n: sections.length, label: lang === 'kk' ? 'модуль' : lang === 'en' ? 'modules' : 'модулей' },
+                  ].map(({ n, label }) => (
+                    <div key={label}>
+                      <div className="b-h2">{n}</div>
+                      <div className="b-xs mt-0.5" style={{ color: 'var(--b-text-3)' }}>{label}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-            {course.instructor.bio && (
-              <p className="b-body" style={{ color: 'var(--b-text-2)', lineHeight: 1.65 }}>{course.instructor.bio}</p>
-            )}
           </div>
         )}
 
@@ -474,25 +508,28 @@ export default function CourseDetailContent({ course, sections, reviews, enrolle
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col gap-4">
-                {reviews.map(rev => (
-                  <div key={rev.id} className="card p-5">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <div className="b-avatar" style={{ width: 36, height: 36, background: 'var(--b-primary-50)', color: 'var(--b-primary)' }}>
+              <>
+                <style>{`.reviews-grid { grid-template-columns: 1fr; } @media(min-width:640px){ .reviews-grid { grid-template-columns: 1fr 1fr; } }`}</style>
+                <div className="reviews-grid grid gap-4">
+                  {reviews.map(rev => (
+                    <div key={rev.id} className="card p-5">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="b-avatar" style={{ width: 38, height: 38, background: 'var(--b-primary)', color: '#fff', fontSize: 15 }}>
                           {rev.student_id.slice(0, 1).toUpperCase()}
                         </div>
-                        <span className="b-sm font-semibold">{rev.student_id.slice(0, 8)}…</span>
+                        <div>
+                          <div className="b-sm font-semibold">{rev.student_id.slice(0, 8)}…</div>
+                          <Stars value={rev.rating} size={11} showNum={false}/>
+                        </div>
                       </div>
-                      <Stars value={rev.rating} size={13} />
+                      {rev.comment && <p className="b-sm" style={{ color: 'var(--b-text-2)', lineHeight: 1.6 }}>«{rev.comment}»</p>}
+                      <div className="b-xs mt-2" style={{ color: 'var(--b-text-4)' }}>
+                        {new Date(rev.created_at).toLocaleDateString(lang === 'kk' ? 'kk-KZ' : lang === 'en' ? 'en-US' : 'ru-RU')}
+                      </div>
                     </div>
-                    {rev.comment && <p className="b-body" style={{ color: 'var(--b-text-2)' }}>{rev.comment}</p>}
-                    <div className="b-xs mt-2" style={{ color: 'var(--b-text-4)' }}>
-                      {new Date(rev.created_at).toLocaleDateString(lang === 'kk' ? 'kk-KZ' : lang === 'en' ? 'en-US' : 'ru-RU')}
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         )}
