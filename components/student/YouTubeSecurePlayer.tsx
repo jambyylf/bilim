@@ -35,95 +35,34 @@ function fmtTime(sec: number) {
 }
 
 const QUALITY_LABELS: Record<string, string> = {
-  hd2160: '4K',
-  hd1440: '1440p',
-  hd1080: '1080p',
-  hd720: '720p',
-  large: '480p',
-  medium: '360p',
-  small: '240p',
-  tiny: '144p',
-  auto: 'Авто',
+  hd2160: '4K', hd1440: '1440p', hd1080: '1080p', hd720: '720p',
+  large: '480p', medium: '360p', small: '240p', tiny: '144p', auto: 'Авто',
 }
 
 const Ico = {
-  Play: () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-  ),
-  Pause: () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-      <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
-    </svg>
-  ),
-  Replay: () => (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
-    </svg>
-  ),
-  VolHigh: () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-    </svg>
-  ),
-  VolMute: () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-      <line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
-    </svg>
-  ),
-  Expand: () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
-      <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
-    </svg>
-  ),
-  Compress: () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/>
-      <line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/>
-    </svg>
-  ),
-  Settings: () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="3"/>
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-    </svg>
-  ),
-  Spin: () => (
-    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-      className="animate-spin" style={{ opacity: 0.5 }}>
-      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/>
-    </svg>
-  ),
+  Play: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>,
+  Pause: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>,
+  Replay: () => <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>,
+  VolHigh: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>,
+  VolMute: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>,
+  Expand: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>,
+  Compress: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg>,
+  Spin: () => <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="animate-spin" style={{ opacity: 0.5 }}><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg>,
 }
 
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
 
-const btnStyle: React.CSSProperties = {
-  color: '#fff',
-  background: 'none',
-  border: 'none',
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: 6,
-  borderRadius: 4,
-  flexShrink: 0,
+const btn: React.CSSProperties = {
+  color: '#fff', background: 'none', border: 'none', cursor: 'pointer',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  padding: '4px 6px', borderRadius: 4, flexShrink: 0,
 }
 
-const menuStyle: React.CSSProperties = {
-  position: 'absolute',
-  bottom: 'calc(100% + 6px)',
-  right: 0,
-  background: 'rgba(12,12,12,0.96)',
-  borderRadius: 8,
-  overflow: 'hidden',
-  boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
-  border: '1px solid rgba(255,255,255,0.1)',
-  minWidth: 90,
+const popup: React.CSSProperties = {
+  position: 'absolute', bottom: 'calc(100% + 8px)', right: 0,
+  background: 'rgba(10,10,10,0.97)', borderRadius: 8, overflow: 'hidden',
+  boxShadow: '0 8px 24px rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.08)',
+  minWidth: 88,
 }
 
 interface Props {
@@ -135,30 +74,28 @@ interface Props {
 
 export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTimeUpdate }: Props) {
   const outerRef = useRef<HTMLDivElement>(null)
-  const ytRef   = useRef<HTMLDivElement>(null)
+  const ytRef    = useRef<HTMLDivElement>(null)
   const playerRef = useRef<any>(null)
   const timerRef  = useRef<ReturnType<typeof setInterval>>()
-  const hideRef   = useRef<ReturnType<typeof setTimeout>>()
   const onEndedRef      = useRef(onEnded)
   const onTimeUpdateRef = useRef(onTimeUpdate)
   useEffect(() => { onEndedRef.current = onEnded }, [onEnded])
   useEffect(() => { onTimeUpdateRef.current = onTimeUpdate }, [onTimeUpdate])
 
-  const [ready,    setReady]    = useState(false)
-  const [error,    setError]    = useState<string | null>(null)
-  const [playing,  setPlaying]  = useState(false)
-  const [ended,    setEnded]    = useState(false)
-  const [muted,    setMuted]    = useState(false)
-  const [volume,   setVolume]   = useState(80)
-  const [speed,    setSpeed]    = useState(1)
-  const [current,  setCurrent]  = useState(0)
-  const [duration, setDuration] = useState(0)
+  const [ready,     setReady]     = useState(false)
+  const [error,     setError]     = useState<string | null>(null)
+  const [playing,   setPlaying]   = useState(false)
+  const [ended,     setEnded]     = useState(false)
+  const [muted,     setMuted]     = useState(false)
+  const [volume,    setVolume]    = useState(80)
+  const [speed,     setSpeed]     = useState(1)
+  const [current,   setCurrent]   = useState(0)
+  const [duration,  setDuration]  = useState(0)
   const [buffering, setBuffering] = useState(false)
-  const [showControls, setShowControls] = useState(true)
-  const [showSpeeds,   setShowSpeeds]   = useState(false)
-  const [showQuality,  setShowQuality]  = useState(false)
-  const [qualities,    setQualities]    = useState<string[]>([])
-  const [curQuality,   setCurQuality]   = useState('auto')
+  const [showSpeeds,  setShowSpeeds]  = useState(false)
+  const [showQuality, setShowQuality] = useState(false)
+  const [qualities,   setQualities]   = useState<string[]>([])
+  const [curQuality,  setCurQuality]  = useState('auto')
   const [isFs, setIsFs] = useState(false)
 
   useEffect(() => {
@@ -181,12 +118,6 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
     }, 500)
     return () => clearInterval(timerRef.current)
   }, [ready])
-
-  const resetHide = useCallback(() => {
-    setShowControls(true)
-    clearTimeout(hideRef.current)
-    hideRef.current = setTimeout(() => setShowControls(false), 3500)
-  }, [])
 
   // Плеер инициализациясы
   useEffect(() => {
@@ -231,8 +162,6 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
           enablejsapi: 1,
           origin: window.location.origin,
           cc_load_policy: 0,
-          // end screen-ді өшіру
-          showinfo: 0,
           fs: 0,
         },
         events: {
@@ -240,7 +169,6 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
             if (!alive) return
             e.target.setVolume(80)
             setDuration(e.target.getDuration() || 0)
-            // Қолжетімді сапаларды аламыз
             const qs: string[] = e.target.getAvailableQualityLevels() || []
             setQualities(qs)
             setCurQuality(e.target.getPlaybackQuality() || 'auto')
@@ -249,11 +177,9 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
           },
           onStateChange(e: any) {
             if (!alive) return
-            // 0=аяқталды 1=ойнап тұр 2=тоқтады 3=буферленуде
             if (e.data === 1) {
               setPlaying(true); setEnded(false); setBuffering(false)
               setDuration(playerRef.current?.getDuration() || 0)
-              resetHide()
             } else if (e.data === 2) {
               setPlaying(false); setBuffering(false)
             } else if (e.data === 3) {
@@ -266,9 +192,7 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
           onPlaybackQualityChange(e: any) {
             if (alive) setCurQuality(e.data || 'auto')
           },
-          onError() {
-            if (alive) setError('Видео жүктелмеді')
-          },
+          onError() { if (alive) setError('Видео жүктелмеді') },
         },
       })
     }
@@ -277,7 +201,6 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
     return () => {
       alive = false
       clearInterval(timerRef.current)
-      clearTimeout(hideRef.current)
       try { playerRef.current?.destroy() } catch {}
       playerRef.current = null
       if (ytRef.current) ytRef.current.innerHTML = ''
@@ -294,7 +217,6 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
     }
     if (playing) { playerRef.current.pauseVideo(); setPlaying(false) }
     else { playerRef.current.playVideo(); setPlaying(true) }
-    resetHide()
   }
 
   function handleSeek(e: React.ChangeEvent<HTMLInputElement>) {
@@ -316,13 +238,11 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
   }
 
   function setSpeedVal(sp: number) {
-    playerRef.current?.setPlaybackRate(sp)
-    setSpeed(sp); setShowSpeeds(false)
+    playerRef.current?.setPlaybackRate(sp); setSpeed(sp); setShowSpeeds(false)
   }
 
   function setQualityVal(q: string) {
-    playerRef.current?.setPlaybackQuality(q)
-    setCurQuality(q); setShowQuality(false)
+    playerRef.current?.setPlaybackQuality(q); setCurQuality(q); setShowQuality(false)
   }
 
   function toggleFs() {
@@ -332,74 +252,26 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
     else document.exitFullscreen?.().catch(() => {})
   }
 
-  function closeMenus() {
-    setShowSpeeds(false); setShowQuality(false)
-  }
-
-  const controlsVisible = showControls || !playing || ended
+  function closeMenus() { setShowSpeeds(false); setShowQuality(false) }
 
   return (
     <div
       ref={outerRef}
-      style={{
-        position: 'relative',
-        width: '100%',
-        aspectRatio: '16/9',
-        background: '#0a0a0a',
-        overflow: 'hidden',
-        userSelect: 'none',
-      }}
-      onMouseMove={resetHide}
-      onMouseEnter={resetHide}
-      onMouseLeave={() => playing && !ended && setShowControls(false)}
+      style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#000', overflow: 'hidden', userSelect: 'none' }}
       onContextMenu={e => e.preventDefault()}
     >
-      {/* YouTube iframe */}
+      {/* YouTube iframe — zoom жоқ, өз өлшемінде */}
       <div ref={ytRef} style={{ position: 'absolute', inset: 0 }} />
 
-      {/* Тұрақты bottom gradient — controls жасырулы болса да YouTube UI-ін жабады */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0, height: '20%',
-        background: 'linear-gradient(transparent, rgba(0,0,0,0.75) 50%, rgba(0,0,0,0.95))',
-        zIndex: 6, pointerEvents: 'none',
-      }} />
-      {/* Тұрақты top gradient */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: '12%',
-        background: 'linear-gradient(rgba(0,0,0,0.65), transparent)',
-        zIndex: 6, pointerEvents: 'none',
-      }} />
-
-      {/* Click overlay — ойнату/тоқтату */}
+      {/* Click/hover блокатор — YouTube hover UI шықпасын */}
       <div
-        style={{ position: 'absolute', inset: 0, zIndex: 9 }}
+        style={{ position: 'absolute', inset: 0, zIndex: 5 }}
         onClick={ready ? () => { closeMenus(); togglePlay() } : undefined}
       />
 
-      {/* Видео аяқталды overlay — YouTube end screen-ді толық жасырады */}
-      {ended && (
-        <div style={{
-          position: 'absolute', inset: 0, background: '#0a0a0a',
-          zIndex: 15, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <button
-            onClick={() => { setEnded(false); playerRef.current?.seekTo(0, true); playerRef.current?.playVideo() }}
-            style={{
-              background: 'rgba(255,255,255,0.1)',
-              border: '2px solid rgba(255,255,255,0.4)',
-              borderRadius: '50%', width: 72, height: 72,
-              color: '#fff', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            <Ico.Replay />
-          </button>
-        </div>
-      )}
-
       {/* Жүктелуде */}
       {!ready && !error && (
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, color: '#fff' }}>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, color: '#fff', background: '#000' }}>
           <Ico.Spin />
         </div>
       )}
@@ -418,75 +290,71 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
         </div>
       )}
 
-      {/* ── Кастомды controls ── */}
+      {/* Видео аяқталды */}
+      {ended && (
+        <div style={{ position: 'absolute', inset: 0, background: '#000', zIndex: 15, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button
+            onClick={() => { setEnded(false); playerRef.current?.seekTo(0, true); playerRef.current?.playVideo() }}
+            style={{ background: 'rgba(255,255,255,0.1)', border: '2px solid rgba(255,255,255,0.35)', borderRadius: '50%', width: 68, height: 68, color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Ico.Replay />
+          </button>
+        </div>
+      )}
+
+      {/* ── Controls — ТҰРАҚТЫ, жасырылмайды → YouTube UI әрқашан астында жабылады ── */}
       {ready && !ended && (
         <div
           style={{
             position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 20,
-            background: 'linear-gradient(transparent, rgba(0,0,0,0.7) 40%, #0a0a0a)',
-            padding: '48px 14px 10px',
-            transition: 'opacity 0.25s ease',
-            opacity: controlsVisible ? 1 : 0,
-            pointerEvents: controlsVisible ? 'auto' : 'none',
+            background: 'linear-gradient(transparent, rgba(0,0,0,0.82) 35%, rgba(0,0,0,0.96))',
+            padding: '40px 14px 10px',
           }}
           onClick={e => e.stopPropagation()}
           onMouseMove={e => e.stopPropagation()}
         >
-          {/* Прогресс жолағы */}
+          {/* Прогресс */}
           <input
             type="range" min={0} max={duration || 100} step={0.5} value={current}
             onChange={handleSeek}
-            style={{ width: '100%', marginBottom: 10, cursor: 'pointer', accentColor: '#F59E0B' }}
+            style={{ width: '100%', marginBottom: 8, cursor: 'pointer', accentColor: '#F59E0B' }}
           />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#fff' }}>
-            {/* Ойнату/Тоқтату */}
-            <button onClick={togglePlay} style={btnStyle}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#fff' }}>
+            <button onClick={togglePlay} style={btn}>
               {playing ? <Ico.Pause /> : <Ico.Play />}
             </button>
 
-            {/* Дыбыс */}
-            <button onClick={toggleMute} style={btnStyle}>
+            <button onClick={toggleMute} style={btn}>
               {muted || volume === 0 ? <Ico.VolMute /> : <Ico.VolHigh />}
             </button>
             <input
               type="range" min={0} max={100} value={muted ? 0 : volume}
               onChange={handleVolume}
-              style={{ width: 68, cursor: 'pointer', accentColor: '#F59E0B' }}
+              style={{ width: 64, cursor: 'pointer', accentColor: '#F59E0B' }}
             />
 
-            {/* Уақыт */}
-            <span style={{
-              fontSize: 13, color: 'rgba(255,255,255,0.75)',
-              fontVariantNumeric: 'tabular-nums', flex: 1, whiteSpace: 'nowrap',
-            }}>
+            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', fontVariantNumeric: 'tabular-nums', flex: 1, whiteSpace: 'nowrap', marginLeft: 4 }}>
               {fmtTime(current)} / {fmtTime(duration)}
             </span>
 
             {/* Сапа */}
             {qualities.length > 0 && (
               <div style={{ position: 'relative' }}>
-                <button
-                  onClick={() => { setShowQuality(v => !v); setShowSpeeds(false) }}
-                  style={{
-                    ...btnStyle, padding: '3px 8px', fontSize: 12, fontWeight: 600,
-                    border: '1px solid rgba(255,255,255,0.25)', borderRadius: 5,
-                  }}
-                >
+                <button onClick={() => { setShowQuality(v => !v); setShowSpeeds(false) }}
+                  style={{ ...btn, fontSize: 11, fontWeight: 600, border: '1px solid rgba(255,255,255,0.2)', borderRadius: 4, padding: '2px 7px' }}>
                   {QUALITY_LABELS[curQuality] ?? curQuality}
                 </button>
                 {showQuality && (
-                  <div style={menuStyle}>
+                  <div style={popup}>
                     {qualities.map(q => (
                       <button key={q} onClick={() => setQualityVal(q)} style={{
-                        display: 'block', width: '100%', padding: '7px 0',
+                        display: 'block', width: '100%', padding: '6px 0',
                         color: q === curQuality ? '#F59E0B' : '#fff',
                         background: q === curQuality ? 'rgba(245,158,11,0.12)' : 'none',
-                        border: 'none', cursor: 'pointer', fontSize: 13, textAlign: 'center',
+                        border: 'none', cursor: 'pointer', fontSize: 12, textAlign: 'center',
                         fontWeight: q === curQuality ? 700 : 400,
-                      }}>
-                        {QUALITY_LABELS[q] ?? q}
-                      </button>
+                      }}>{QUALITY_LABELS[q] ?? q}</button>
                     ))}
                   </div>
                 )}
@@ -495,34 +363,26 @@ export default function YouTubeSecurePlayer({ lessonId, autoPlay, onEnded, onTim
 
             {/* Жылдамдық */}
             <div style={{ position: 'relative' }}>
-              <button
-                onClick={() => { setShowSpeeds(v => !v); setShowQuality(false) }}
-                style={{
-                  ...btnStyle, padding: '3px 9px', fontSize: 13, fontWeight: 600,
-                  border: '1px solid rgba(255,255,255,0.25)', borderRadius: 5,
-                }}
-              >
+              <button onClick={() => { setShowSpeeds(v => !v); setShowQuality(false) }}
+                style={{ ...btn, fontSize: 11, fontWeight: 600, border: '1px solid rgba(255,255,255,0.2)', borderRadius: 4, padding: '2px 7px' }}>
                 {speed}×
               </button>
               {showSpeeds && (
-                <div style={menuStyle}>
+                <div style={popup}>
                   {SPEEDS.map(sp => (
                     <button key={sp} onClick={() => setSpeedVal(sp)} style={{
-                      display: 'block', width: '100%', padding: '7px 0',
+                      display: 'block', width: '100%', padding: '6px 0',
                       color: sp === speed ? '#F59E0B' : '#fff',
                       background: sp === speed ? 'rgba(245,158,11,0.12)' : 'none',
-                      border: 'none', cursor: 'pointer', fontSize: 13, textAlign: 'center',
+                      border: 'none', cursor: 'pointer', fontSize: 12, textAlign: 'center',
                       fontWeight: sp === speed ? 700 : 400,
-                    }}>
-                      {sp}×
-                    </button>
+                    }}>{sp}×</button>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Толық экран */}
-            <button onClick={toggleFs} style={btnStyle}>
+            <button onClick={toggleFs} style={btn}>
               {isFs ? <Ico.Compress /> : <Ico.Expand />}
             </button>
           </div>
